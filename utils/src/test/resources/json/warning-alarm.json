@@ -1,0 +1,22 @@
+{
+  "domain": "ROADMInterfaceAlarm",
+  "description": "Interface Exploded",
+  "severity": "Warning",
+  "primarySubject": [
+    {
+      "name": "nodeAlias",
+      "value": "node1"
+    },
+    {
+      "name": "interfaceAlias",
+      "value": "iface1"
+    }
+  ],
+  "additionalData": [
+    {
+      "name": "auxField1",
+      "value": "auxValue1"
+    }
+  ],
+  "eventTimestamp": 1417783187
+}

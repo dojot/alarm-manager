@@ -1,0 +1,10 @@
+<alarm-metamodel>
+    <domain>testDomain</domain>
+    <namespace>testNamespace</namespace>
+    <primary-subject>
+        <primary-field type="alphanumeric">field1</primary-field>
+    </primary-subject>
+    <additional-data>
+        <additional-field type="numeric">field1</additional-field>
+    </additional-data>
+</alarm-metamodel>
