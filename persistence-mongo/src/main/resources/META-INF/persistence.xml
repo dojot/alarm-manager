@@ -7,8 +7,7 @@
         <provider>org.hibernate.ogm.jpa.HibernateOgmPersistence</provider>
         <jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
         <jar-file>core-api.jar</jar-file>
-        <class>com.cpqd.vppd.alarmmanager.core.model.ClearableAlarm</class>
-        <class>com.cpqd.vppd.alarmmanager.core.model.WarningAlarm</class>
+        <class>com.cpqd.vppd.alarmmanager.core.model.Alarm</class>
         <properties>
             <property name="hibernate.transaction.jta.platform"
                       value="org.hibernate.service.jta.platform.internal.JBossAppServerJtaPlatform" />
@@ -18,7 +17,7 @@
             <property name="hibernate.ogm.datastore.username" value="${mongo.user}" />
             <property name="hibernate.ogm.datastore.password" value="${mongo.pass}" />
             <property name="hibernate.ogm.datastore.database" value="alarms" />
-            <property name="hibernate.show_sql" value="false" />
+            <property name="hibernate.show_sql" value="true" />
         </properties>
     </persistence-unit>
 </persistence>

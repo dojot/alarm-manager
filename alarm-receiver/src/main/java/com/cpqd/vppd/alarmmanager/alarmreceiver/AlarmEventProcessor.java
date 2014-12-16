@@ -1,8 +1,8 @@
 package com.cpqd.vppd.alarmmanager.alarmreceiver;
 
 import com.cpqd.vppd.alarmmanager.core.model.AlarmEvent;
-import com.cpqd.vppd.alarmmanager.utils.AlarmJsonConverter;
-import com.cpqd.vppd.alarmmanager.utils.exception.InvalidAlarmJsonException;
+import com.cpqd.vppd.alarmmanager.core.converter.AlarmJsonConverter;
+import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmJsonException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -5,5 +5,6 @@ package com.cpqd.vppd.alarmmanager.core.model;
  */
 public enum AlarmDisappearanceReason {
     NormalClearance,
-    SystemReset
+    SystemReset,
+    WarningTimeout
 }

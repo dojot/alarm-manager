@@ -1,4 +1,4 @@
-package com.cpqd.vppd.alarmmanager.utils.exception;
+package com.cpqd.vppd.alarmmanager.core.exception;
 
 /**
  * Created by fabio on 10/12/14.

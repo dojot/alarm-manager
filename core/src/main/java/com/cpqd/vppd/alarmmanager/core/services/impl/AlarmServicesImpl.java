@@ -5,6 +5,7 @@ import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.DomainSpecificField;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
+import com.cpqd.vppd.alarmmanager.utils.repository.GenericFilter;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -26,7 +27,7 @@ public class AlarmServicesImpl implements AlarmServices {
 
     @Override
     public void update(Alarm alarm) {
-
+        alarmRepository.update(alarm);
     }
 
     @Override
@@ -35,12 +36,7 @@ public class AlarmServicesImpl implements AlarmServices {
     }
 
     @Override
-    public boolean existsByPrimarySubject(Set<DomainSpecificField> primarySubject) {
-        return false;
-    }
-
-    @Override
-    public Alarm findByPrimarySubject(Set<DomainSpecificField> primarySubject) throws AlarmNotPresentException {
-        return null;
+    public Alarm findByPrimarySubject(Set<DomainSpecificField> primarySubject) {
+        return alarmRepository.findByPrimarySubject(primarySubject);
     }
 }

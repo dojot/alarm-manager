@@ -19,7 +19,5 @@ public interface AlarmServices {
 
     void clear(Set<DomainSpecificField> primarySubject, Long reportedDisappearanceTimestamp) throws AlarmNotPresentException;
 
-    boolean existsByPrimarySubject(Set<DomainSpecificField> primarySubject);
-
-    Alarm findByPrimarySubject(Set<DomainSpecificField> primarySubject) throws AlarmNotPresentException;
+    Alarm findByPrimarySubject(Set<DomainSpecificField> primarySubject);
 }

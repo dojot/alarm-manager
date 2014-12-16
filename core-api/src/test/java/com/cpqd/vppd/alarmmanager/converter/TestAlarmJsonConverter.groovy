@@ -1,5 +1,6 @@
-package com.cpqd.vppd.alarmmanager.utils
+package com.cpqd.vppd.alarmmanager.converter
 
+import com.cpqd.vppd.alarmmanager.core.converter.AlarmJsonConverter
 import com.cpqd.vppd.alarmmanager.core.model.AlarmEvent
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity
 import com.cpqd.vppd.alarmmanager.core.model.DomainSpecificField

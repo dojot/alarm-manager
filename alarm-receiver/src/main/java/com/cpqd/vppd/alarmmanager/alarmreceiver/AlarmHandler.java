@@ -1,6 +1,7 @@
 package com.cpqd.vppd.alarmmanager.alarmreceiver;
 
 import com.cpqd.vppd.alarmmanager.core.exception.AlarmNotPresentException;
+import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmException;
 import com.cpqd.vppd.alarmmanager.core.exception.UnknownAlarmMetaModelException;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModel;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModelManager;
@@ -39,33 +40,16 @@ public class AlarmHandler {
     private Validator alarmValidator;
 
     public void handleAlarmEvent(AlarmEvent alarmEvent) {
-        // validate alarm instance against metamodel
-        Set<ConstraintViolation<AlarmEvent>> violations = alarmValidator.validate(alarmEvent);
-        if (!violations.isEmpty()) {
-            LOGGER.error("Invalid alarm event received: {}", violations);
-            return;
-        }
-
-        AlarmMetaModel metaModel;
         try {
-            metaModel = alarmMetaModelManager.getMetaModelForDomain(alarmEvent.getDomain());
-        } catch (UnknownAlarmMetaModelException e) {
-            LOGGER.error("Received alarm event mentions an unknown domain '{}'. Event discarded.", alarmEvent.getDomain());
+            validateAlarm(alarmEvent);
+        } catch (InvalidAlarmException e) {
+            LOGGER.error("Received alarm event is invalid and will be discarded.");
             return;
-        }
-
-        if (!validateVariableFieldsAgainstMetaModel(metaModel.getPrimarySubject(), alarmEvent.getPrimarySubject())) {
-            LOGGER.error("Received alarm event's primary subject does not match specified meta model. Event discarded");
-            return;
-        }
-
-        if (!validateVariableFieldsAgainstMetaModel(metaModel.getAdditionalData(), alarmEvent.getAdditionalData())) {
-            LOGGER.error("Received alarm event's additional data does not match specified meta model. Event discarded");
         }
 
         // handle alarm
         if (AlarmSeverity.Clear.equals(alarmEvent.getSeverity())) {
-            // alarm disappearance
+            // TODO alarm disappearance
             try {
                 alarmServices.clear(alarmEvent.getPrimarySubject(), alarmEvent.getEventTimestamp());
             } catch (AlarmNotPresentException e) {
@@ -74,45 +58,55 @@ public class AlarmHandler {
         } else {
             // alarm appearance or update
             // check if the alarm is already present
-            boolean alarmExists = alarmServices.existsByPrimarySubject(alarmEvent.getPrimarySubject());
-            Alarm receivedAlarm = Alarm.fromAlarmEvent(alarmEvent, !alarmExists);
+            Alarm existingAlarm = alarmServices.findByPrimarySubject(alarmEvent.getPrimarySubject());
+            Alarm receivedAlarm = Alarm.fromAlarmEvent(alarmEvent, existingAlarm != null);
 
-            if (alarmExists) {
+            if (existingAlarm != null) {
+                LOGGER.debug("Received event is an update for an existing alarm");
                 alarmServices.update(receivedAlarm);
             } else {
+                // the alarm does not exist in the system, add it
+                LOGGER.debug("Received event will be persisted as a new alarm");
                 alarmServices.add(receivedAlarm);
             }
         }
     }
 
-    private void validateAlarm(AlarmEvent alarmEvent) {
-        // validate alarm instance against metamodel
+    private void validateAlarm(AlarmEvent alarmEvent) throws InvalidAlarmException {
+        // perform basic validation of mandatory fields
         Set<ConstraintViolation<AlarmEvent>> violations = alarmValidator.validate(alarmEvent);
-        if (!violations.isEmpty()) {
-            LOGGER.error("Invalid alarm event received: {}", violations);
-            return;
+        if (violations.size() > 0) {
+            ConstraintViolation<AlarmEvent> first = violations.iterator().next();
+            LOGGER.error("Invalid alarm event received: {} {}",
+                    first.getPropertyPath().toString(), first.getMessageTemplate());
+            throw InvalidAlarmException.buildFromNullField(first.getPropertyPath().toString());
         }
 
+        // obtain the metamodel instance specified by the alarm instance
         AlarmMetaModel metaModel;
         try {
             metaModel = alarmMetaModelManager.getMetaModelForDomain(alarmEvent.getDomain());
         } catch (UnknownAlarmMetaModelException e) {
-            LOGGER.error("Received alarm event mentions an unknown domain '{}'. Event discarded.", alarmEvent.getDomain());
-            return;
+            LOGGER.error("Received alarm event mentions an unknown domain '{}'.", alarmEvent.getDomain());
+            throw new InvalidAlarmException(InvalidAlarmException.Cause.UNKNOWN_DOMAIN);
         }
 
-        if (!validateVariableFieldsAgainstMetaModel(metaModel.getPrimarySubject(), alarmEvent.getPrimarySubject())) {
-            LOGGER.error("Received alarm event's primary subject does not match specified meta model. Event discarded");
-            return;
+        // validate domain specific fields against the metamodel
+        if (!validateDomainSpecificFieldsAgainstMetaModel(metaModel.getPrimarySubject(),
+                alarmEvent.getPrimarySubject())) {
+            LOGGER.error("Received alarm event's primary subject does not match specified meta model.");
+            throw new InvalidAlarmException(InvalidAlarmException.Cause.MALFORMED_PRIMARY_SUBJECT);
         }
 
-        if (!validateVariableFieldsAgainstMetaModel(metaModel.getAdditionalData(), alarmEvent.getAdditionalData())) {
-            LOGGER.error("Received alarm event's additional data does not match specified meta model. Event discarded");
+        if (!validateDomainSpecificFieldsAgainstMetaModel(metaModel.getAdditionalData(),
+                alarmEvent.getAdditionalData())) {
+            LOGGER.error("Received alarm event's additional data does not match specified meta model.");
+            throw new InvalidAlarmException(InvalidAlarmException.Cause.MALFORMED_ADDITIONAL_DATA);
         }
     }
 
-    private boolean validateVariableFieldsAgainstMetaModel(Set<DomainSpecificField> metaModelFields,
-                                                           Set<DomainSpecificField> eventFields) {
+    private boolean validateDomainSpecificFieldsAgainstMetaModel(Set<DomainSpecificField> metaModelFields,
+                                                                 Set<DomainSpecificField> eventFields) {
         // TODO validate field types
         return metaModelFields.equals(eventFields);
     }

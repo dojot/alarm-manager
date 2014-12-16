@@ -1,5 +1,6 @@
-package com.cpqd.vppd.alarmmanager.utils
+package com.cpqd.vppd.alarmmanager.converter
 
+import com.cpqd.vppd.alarmmanager.core.converter.AlarmMetaModelXmlConverter
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModel
 import com.cpqd.vppd.alarmmanager.core.model.DomainSpecificField
 import org.apache.commons.io.FileUtils

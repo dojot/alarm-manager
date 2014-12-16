@@ -1,7 +1,7 @@
-package com.cpqd.vppd.alarmmanager.utils;
+package com.cpqd.vppd.alarmmanager.core.converter;
 
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModel;
-import com.cpqd.vppd.alarmmanager.utils.exception.InvalidAlarmMetaModelXmlException;
+import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmMetaModelXmlException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;

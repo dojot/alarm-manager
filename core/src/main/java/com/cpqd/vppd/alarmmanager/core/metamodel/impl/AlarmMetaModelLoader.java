@@ -2,8 +2,8 @@ package com.cpqd.vppd.alarmmanager.core.metamodel.impl;
 
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModel;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModelManager;
-import com.cpqd.vppd.alarmmanager.utils.AlarmMetaModelXmlConverter;
-import com.cpqd.vppd.alarmmanager.utils.exception.InvalidAlarmMetaModelXmlException;
+import com.cpqd.vppd.alarmmanager.core.converter.AlarmMetaModelXmlConverter;
+import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmMetaModelXmlException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;

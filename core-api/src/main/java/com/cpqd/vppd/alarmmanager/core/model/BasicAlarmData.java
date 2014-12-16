@@ -1,18 +1,21 @@
 package com.cpqd.vppd.alarmmanager.core.model;
 
+import com.cpqd.vppd.alarmmanager.utils.repository.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableSet;
 import org.hibernate.annotations.Type;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 /**
- * Created by fabio on 09/12/14.
+ * Class that defines a basic set of common data shared between all the concrete classes
+ * that represent alarm-related entities, such as {@link AlarmEvent} and {@link Alarm}.
  */
 @MappedSuperclass
-public abstract class BasicAlarmData {
+public abstract class BasicAlarmData {// extends BaseEntity<BasicAlarmData> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Type(type = "objectid")
@@ -27,16 +30,8 @@ public abstract class BasicAlarmData {
     @NotNull
     private AlarmSeverity severity;
 
-//    @NotNull
-//    @NotEmpty
-//    @OneToMany
-//    private Map<String, String> primarySubject;
-//
-//    @NotNull
-//    @NotEmpty
-//    @OneToMany
-//    private Map<String, String> additionalData;
-
+    @NotNull
+    @NotEmpty
     @ElementCollection
     private Set<DomainSpecificField> primarySubject;
 

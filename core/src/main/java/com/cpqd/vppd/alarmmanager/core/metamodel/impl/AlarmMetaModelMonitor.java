@@ -3,14 +3,13 @@ package com.cpqd.vppd.alarmmanager.core.metamodel.impl;
 import com.cpqd.vppd.alarmmanager.core.exception.UnknownAlarmMetaModelException;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModel;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModelManager;
-import com.cpqd.vppd.alarmmanager.utils.AlarmMetaModelXmlConverter;
-import com.cpqd.vppd.alarmmanager.utils.exception.InvalidAlarmMetaModelXmlException;
+import com.cpqd.vppd.alarmmanager.core.converter.AlarmMetaModelXmlConverter;
+import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmMetaModelXmlException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.*;
 import javax.inject.Inject;
