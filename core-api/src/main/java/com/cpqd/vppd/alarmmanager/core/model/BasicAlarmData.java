@@ -1,25 +1,22 @@
 package com.cpqd.vppd.alarmmanager.core.model;
 
-import com.cpqd.vppd.alarmmanager.utils.repository.BaseEntity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.ImmutableSet;
-import org.hibernate.annotations.Type;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.common.collect.ImmutableMap;
 import org.hibernate.validator.constraints.NotEmpty;
+import org.jongo.marshall.jackson.oid.Id;
+import org.jongo.marshall.jackson.oid.ObjectId;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Set;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Class that defines a basic set of common data shared between all the concrete classes
  * that represent alarm-related entities, such as {@link AlarmEvent} and {@link Alarm}.
  */
-@MappedSuperclass
-public abstract class BasicAlarmData {// extends BaseEntity<BasicAlarmData> {
+public abstract class BasicAlarmData {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Type(type = "objectid")
-    @JsonIgnore
+    @ObjectId
     private String id;
 
     @NotNull
@@ -32,11 +29,11 @@ public abstract class BasicAlarmData {// extends BaseEntity<BasicAlarmData> {
 
     @NotNull
     @NotEmpty
-    @ElementCollection
-    private Set<DomainSpecificField> primarySubject;
+    @JsonDeserialize(as = TreeMap.class)
+    private Map<String, Object> primarySubject;
 
-    @ElementCollection
-    private Set<DomainSpecificField> additionalData;
+    @JsonDeserialize(as = TreeMap.class)
+    private Map<String, Object> additionalData;
 
     public BasicAlarmData() {
 
@@ -46,8 +43,8 @@ public abstract class BasicAlarmData {// extends BaseEntity<BasicAlarmData> {
         this.domain = other.domain;
         this.description = other.description;
         this.severity = other.severity;
-        this.primarySubject = ImmutableSet.copyOf(other.primarySubject);
-        this.additionalData = ImmutableSet.copyOf(other.additionalData);
+        this.primarySubject = ImmutableMap.copyOf(other.primarySubject);
+        this.additionalData = ImmutableMap.copyOf(other.additionalData);
     }
 
     public String getId() {
@@ -82,19 +79,19 @@ public abstract class BasicAlarmData {// extends BaseEntity<BasicAlarmData> {
         this.severity = severity;
     }
 
-    public Set<DomainSpecificField> getPrimarySubject() {
-        return primarySubject;
-    }
-
-    public void setPrimarySubject(Set<DomainSpecificField> primarySubject) {
-        this.primarySubject = primarySubject;
-    }
-
-    public Set<DomainSpecificField> getAdditionalData() {
+    public Map<String, Object> getAdditionalData() {
         return additionalData;
     }
 
-    public void setAdditionalData(Set<DomainSpecificField> additionalData) {
+    public void setAdditionalData(Map<String, Object> additionalData) {
         this.additionalData = additionalData;
+    }
+
+    public Map<String, Object> getPrimarySubject() {
+        return primarySubject;
+    }
+
+    public void setPrimarySubject(Map<String, Object> primarySubject) {
+        this.primarySubject = primarySubject;
     }
 }

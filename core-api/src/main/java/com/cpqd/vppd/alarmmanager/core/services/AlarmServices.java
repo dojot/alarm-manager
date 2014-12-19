@@ -17,7 +17,7 @@ public interface AlarmServices {
 
     void update(Alarm alarm);
 
-    void clear(Set<DomainSpecificField> primarySubject, Long reportedDisappearanceTimestamp) throws AlarmNotPresentException;
+    void clear(Map<String, Object> primarySubject, Long reportedDisappearanceTimestamp) throws AlarmNotPresentException;
 
-    Alarm findByPrimarySubject(Set<DomainSpecificField> primarySubject);
+    Alarm findByPrimarySubject(Map<String, Object> primarySubject);
 }

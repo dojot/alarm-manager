@@ -5,10 +5,10 @@ import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.DomainSpecificField;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
-import com.cpqd.vppd.alarmmanager.utils.repository.GenericFilter;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,16 +27,16 @@ public class AlarmServicesImpl implements AlarmServices {
 
     @Override
     public void update(Alarm alarm) {
-        alarmRepository.update(alarm);
+//        alarmRepository.update(alarm);
     }
 
     @Override
-    public void clear(Set<DomainSpecificField> primarySubject, Long reportedDisappearanceTimestamp) throws AlarmNotPresentException {
+    public void clear(Map<String, Object> primarySubject, Long reportedDisappearanceTimestamp) throws AlarmNotPresentException {
 
     }
 
     @Override
-    public Alarm findByPrimarySubject(Set<DomainSpecificField> primarySubject) {
+    public Alarm findByPrimarySubject(Map<String, Object> primarySubject) {
         return alarmRepository.findByPrimarySubject(primarySubject);
     }
 }

@@ -25,11 +25,23 @@
         </dependency>
         <dependency>
             <groupId>com.cpqd.vppd.alarm-manager</groupId>
+            <artifactId>mongo-connector</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cpqd.vppd.alarm-manager</groupId>
             <artifactId>utils</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jongo</groupId>
+            <artifactId>jongo</artifactId>
         </dependency>
     </dependencies>
 

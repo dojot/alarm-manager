@@ -24,10 +24,6 @@
             <artifactId>alarm-receiver</artifactId>
             <type>ejb</type>
         </dependency>
-        <dependency>
-            <groupId>com.cpqd.vppd.alarm-manager</groupId>
-            <artifactId>persistence-mongo</artifactId>
-        </dependency>
         <!-- <dependency>
             <groupId>com.cpqd.drc.sdcc.appserver</groupId>
             <artifactId>hcibridge</artifactId>

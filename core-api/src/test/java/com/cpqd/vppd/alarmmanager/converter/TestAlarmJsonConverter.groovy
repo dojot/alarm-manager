@@ -31,10 +31,10 @@ class TestAlarmJsonConverter extends Specification {
         alarmEvent.description == "Interface Exploded"
         alarmEvent.severity == AlarmSeverity.Warning
         alarmEvent.primarySubject.size() == 2
-        alarmEvent.primarySubject.contains(new DomainSpecificField("nodeAlias", "doesntmatter","doesntmatter"))
-        alarmEvent.primarySubject.contains(new DomainSpecificField("interfaceAlias", "doesntmatter","doesntmatter"))
+        alarmEvent.primarySubject.containsKey("nodeAlias")
+        alarmEvent.primarySubject.containsKey("interfaceAlias")
         alarmEvent.additionalData.size() == 1
-        alarmEvent.additionalData.contains(new DomainSpecificField("auxField1", "doesntmatter","doesntmatter"))
+        alarmEvent.additionalData.containsKey("auxField1")
         alarmEvent.eventTimestamp != null
     }
 }

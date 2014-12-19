@@ -1,10 +1,7 @@
 package com.cpqd.vppd.alarmmanager.core.model;
 
-import com.cpqd.vppd.alarmmanager.utils.repository.BaseEntity;
-
 import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
-import java.io.Serializable;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -12,8 +9,11 @@ import java.util.Date;
  */
 @Entity
 public class Alarm extends BasicAlarmData {
+    @NotNull
     private Long appearance;
+    @NotNull
     private Long reportedAppearance;
+    @NotNull
     private Long lastModified;
     private AlarmDisappearanceReason reason;
     private String reportedReason;
@@ -96,24 +96,4 @@ public class Alarm extends BasicAlarmData {
 
         return alarm;
     }
-
-//    @Override
-//    protected BasicAlarmData getThis() {
-//        return this;
-//    }
-//
-//    @Override
-//    public Serializable getPk() {
-//        return getId();
-//    }
-//
-//    @Override
-//    protected Object[] getHashCodeData() {
-//        return new Object[] { getPrimarySubject() };
-//    }
-//
-//    @Override
-//    protected boolean dataEquals(BasicAlarmData other) {
-//        return getPrimarySubject().equals(other.getPrimarySubject());
-//    }
 }

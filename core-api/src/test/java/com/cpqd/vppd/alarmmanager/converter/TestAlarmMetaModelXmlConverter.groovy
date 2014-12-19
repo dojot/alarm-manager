@@ -21,8 +21,8 @@ class TestAlarmMetaModelXmlConverter extends Specification {
         AlarmMetaModel metaModel = new AlarmMetaModel()
         metaModel.domain = "testDomain"
         metaModel.namespace = "testNamespace"
-        metaModel.addPrimarySubjectField(new DomainSpecificField("field1", null, "alphanumeric"))
-        metaModel.addAdditionalDataField(new DomainSpecificField("field1", null, "numeric"))
+        metaModel.addPrimarySubjectField(new DomainSpecificField("field1", "alphanumeric"))
+        metaModel.addAdditionalDataField(new DomainSpecificField("field1", "numeric"))
 
         when: "the instance is converted to an XML string"
         String xml = alarmMetaModelXmlConverter.toXml(metaModel)

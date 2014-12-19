@@ -10,6 +10,8 @@ import com.cpqd.vppd.alarmmanager.core.model.AlarmEvent;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 import com.cpqd.vppd.alarmmanager.core.model.DomainSpecificField;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -106,8 +110,18 @@ public class AlarmHandler {
     }
 
     private boolean validateDomainSpecificFieldsAgainstMetaModel(Set<DomainSpecificField> metaModelFields,
-                                                                 Set<DomainSpecificField> eventFields) {
+                                                                 Map<String, Object> eventFields) {
         // TODO validate field types
-        return metaModelFields.equals(eventFields);
+        if (metaModelFields.size() != eventFields.size()) {
+            return false;
+        }
+
+        for (DomainSpecificField metaModelField : metaModelFields) {
+            if (!eventFields.containsKey(metaModelField.getName())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
