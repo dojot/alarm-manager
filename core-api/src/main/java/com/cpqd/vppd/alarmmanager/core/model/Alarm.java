@@ -1,5 +1,8 @@
 package com.cpqd.vppd.alarmmanager.core.model;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -10,15 +13,21 @@ import java.util.Date;
 @Entity
 public class Alarm extends BasicAlarmData {
     @NotNull
-    private Long appearance;
+    private Date appearance;
+
     @NotNull
-    private Long reportedAppearance;
+    private Date reportedAppearance;
+
     @NotNull
-    private Long lastModified;
+    private Date lastModified;
+
     private AlarmDisappearanceReason reason;
+
     private String reportedReason;
-    private Long disappearance;
-    private Long reportedDisappearance;
+
+    private Date disappearance;
+
+    private Date reportedDisappearance;
 
     public Alarm() {
 
@@ -28,27 +37,27 @@ public class Alarm extends BasicAlarmData {
         super(basicAlarmData);
     }
 
-    public Long getAppearance() {
+    public Date getAppearance() {
         return appearance;
     }
 
-    public void setAppearance(Long appearance) {
+    public void setAppearance(Date appearance) {
         this.appearance = appearance;
     }
 
-    public Long getReportedAppearance() {
+    public Date getReportedAppearance() {
         return reportedAppearance;
     }
 
-    public void setReportedAppearance(Long reportedAppearance) {
+    public void setReportedAppearance(Date reportedAppearance) {
         this.reportedAppearance = reportedAppearance;
     }
 
-    public Long getLastModified() {
+    public Date getLastModified() {
         return lastModified;
     }
 
-    public void setLastModified(Long lastModified) {
+    public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
     }
 
@@ -68,24 +77,24 @@ public class Alarm extends BasicAlarmData {
         this.reportedReason = reportedReason;
     }
 
-    public Long getDisappearance() {
+    public Date getDisappearance() {
         return disappearance;
     }
 
-    public void setDisappearance(Long disappearance) {
+    public void setDisappearance(Date disappearance) {
         this.disappearance = disappearance;
     }
 
-    public Long getReportedDisappearance() {
+    public Date getReportedDisappearance() {
         return reportedDisappearance;
     }
 
-    public void setReportedDisappearance(Long reportedDisappearance) {
+    public void setReportedDisappearance(Date reportedDisappearance) {
         this.reportedDisappearance = reportedDisappearance;
     }
 
     public static Alarm fromAlarmEvent(AlarmEvent alarmEvent, boolean isNew) {
-        long currentTimestamp = new Date().getTime();
+        Date currentTimestamp = DateTime.now(DateTimeZone.UTC).toDate();
 
         Alarm alarm = new Alarm(alarmEvent);
         alarm.setLastModified(currentTimestamp);

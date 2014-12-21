@@ -2,14 +2,13 @@ package com.cpqd.vppd.alarmmanager.core.services.impl;
 
 import com.cpqd.vppd.alarmmanager.core.exception.AlarmNotPresentException;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
-import com.cpqd.vppd.alarmmanager.core.model.DomainSpecificField;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import java.util.Date;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Implementation for alarm business services.
@@ -31,7 +30,7 @@ public class AlarmServicesImpl implements AlarmServices {
     }
 
     @Override
-    public void clear(Map<String, Object> primarySubject, Long reportedDisappearanceTimestamp) throws AlarmNotPresentException {
+    public void clear(Map<String, Object> primarySubject, Date reportedDisappearanceTimestamp) throws AlarmNotPresentException {
 
     }
 

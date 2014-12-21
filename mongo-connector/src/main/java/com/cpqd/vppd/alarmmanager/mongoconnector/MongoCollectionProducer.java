@@ -2,9 +2,11 @@ package com.cpqd.vppd.alarmmanager.mongoconnector;
 
 import com.cpqd.vppd.alarmmanager.mongoconnector.annotation.JongoCollection;
 import com.cpqd.vppd.alarmmanager.mongoconnector.util.Reflection;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.mongodb.DB;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
+import org.jongo.marshall.jackson.JacksonMapper;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -23,7 +25,9 @@ public class MongoCollectionProducer {
 
     @PostConstruct
     public void initialize() throws UnknownHostException {
-        jongo = new Jongo(mongoDb);
+        jongo = new Jongo(mongoDb, new JacksonMapper.Builder()
+                .registerModule(new JodaModule())
+                .build());
     }
 
     @Produces

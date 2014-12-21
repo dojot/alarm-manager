@@ -10,8 +10,6 @@ import com.cpqd.vppd.alarmmanager.core.model.AlarmEvent;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 import com.cpqd.vppd.alarmmanager.core.model.DomainSpecificField;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,12 +17,11 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by fabio on 05/12/14.
+ * Class that implements the logic of alarm handling.
  */
 @Stateless
 public class AlarmHandler {
@@ -63,7 +60,7 @@ public class AlarmHandler {
             // alarm appearance or update
             // check if the alarm is already present
             Alarm existingAlarm = alarmServices.findByPrimarySubject(alarmEvent.getPrimarySubject());
-            Alarm receivedAlarm = Alarm.fromAlarmEvent(alarmEvent, existingAlarm != null);
+            Alarm receivedAlarm = Alarm.fromAlarmEvent(alarmEvent, existingAlarm == null);
 
             if (existingAlarm != null) {
                 LOGGER.debug("Received event is an update for an existing alarm");
@@ -102,10 +99,12 @@ public class AlarmHandler {
             throw new InvalidAlarmException(InvalidAlarmException.Cause.MALFORMED_PRIMARY_SUBJECT);
         }
 
-        if (!validateDomainSpecificFieldsAgainstMetaModel(metaModel.getAdditionalData(),
-                alarmEvent.getAdditionalData())) {
-            LOGGER.error("Received alarm event's additional data does not match specified meta model.");
-            throw new InvalidAlarmException(InvalidAlarmException.Cause.MALFORMED_ADDITIONAL_DATA);
+        if (alarmEvent.getAdditionalData() != null) {
+            if (!validateDomainSpecificFieldsAgainstMetaModel(metaModel.getAdditionalData(),
+                    alarmEvent.getAdditionalData())) {
+                LOGGER.error("Received alarm event's additional data does not match specified meta model.");
+                throw new InvalidAlarmException(InvalidAlarmException.Cause.MALFORMED_ADDITIONAL_DATA);
+            }
         }
     }
 

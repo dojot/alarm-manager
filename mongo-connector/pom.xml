@@ -39,6 +39,10 @@
             <groupId>org.jongo</groupId>
             <artifactId>jongo</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-joda</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
