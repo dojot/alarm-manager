@@ -13,11 +13,21 @@ public class AlarmEvent extends BasicAlarmData {
     @NotNull
     private Date eventTimestamp;
 
+    private String disappearanceReason;
+
     public Date getEventTimestamp() {
         return eventTimestamp;
     }
 
     public void setEventTimestamp(Date eventTimestamp) {
         this.eventTimestamp = eventTimestamp;
+    }
+
+    public String getDisappearanceReason() {
+        return disappearanceReason;
+    }
+
+    public void setDisappearanceReason(String disappearanceReason) {
+        this.disappearanceReason = disappearanceReason;
     }
 }

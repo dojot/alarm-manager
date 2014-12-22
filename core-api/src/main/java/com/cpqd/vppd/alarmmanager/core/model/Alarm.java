@@ -93,16 +93,31 @@ public class Alarm extends BasicAlarmData {
         this.reportedDisappearance = reportedDisappearance;
     }
 
-    public static Alarm fromAlarmEvent(AlarmEvent alarmEvent, boolean isNew) {
+    public static Alarm newFromAlarmEvent(AlarmEvent alarmEvent) {
         Date currentTimestamp = DateTime.now(DateTimeZone.UTC).toDate();
 
         Alarm alarm = new Alarm(alarmEvent);
         alarm.setLastModified(currentTimestamp);
-        if (isNew) {
-            alarm.setAppearance(currentTimestamp);
-            alarm.setReportedAppearance(alarmEvent.getEventTimestamp());
-        }
+        alarm.setAppearance(currentTimestamp);
+        alarm.setReportedAppearance(alarmEvent.getEventTimestamp());
 
         return alarm;
+    }
+
+    public void updateWithEvent(AlarmEvent alarmEvent) {
+        Date currentTimestamp = DateTime.now(DateTimeZone.UTC).toDate();
+
+        this.lastModified = currentTimestamp;
+
+        if (AlarmSeverity.Clear.equals(alarmEvent.getSeverity())) {
+            // update disappearance related fields
+            this.disappearance = currentTimestamp;
+            this.reportedDisappearance = alarmEvent.getEventTimestamp();
+            this.reason = AlarmDisappearanceReason.NormalClearance;
+            this.reportedReason = alarmEvent.getDisappearanceReason();
+        } else {
+            // alarm updated
+            this.severity = alarmEvent.getSeverity();
+        }
     }
 }

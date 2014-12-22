@@ -150,7 +150,7 @@ public class AlarmMetaModelMonitor {
 
                                 valid = watchKey.reset();
                             }
-                        } while (valid && keepRunning); //!sessionContext.wasCancelCalled());
+                        } while (valid && keepRunning);
 
                     } catch (IOException e) {
                         LOGGER.error("Metamodel monitoring service could not be started", e);

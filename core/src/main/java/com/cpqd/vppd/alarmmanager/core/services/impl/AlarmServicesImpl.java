@@ -2,12 +2,13 @@ package com.cpqd.vppd.alarmmanager.core.services.impl;
 
 import com.cpqd.vppd.alarmmanager.core.exception.AlarmNotPresentException;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
-import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
+import com.cpqd.vppd.alarmmanager.core.repository.impl.AlarmRepository;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,16 +27,16 @@ public class AlarmServicesImpl implements AlarmServices {
 
     @Override
     public void update(Alarm alarm) {
-//        alarmRepository.update(alarm);
+        alarmRepository.update(alarm);
     }
 
     @Override
-    public void clear(Map<String, Object> primarySubject, Date reportedDisappearanceTimestamp) throws AlarmNotPresentException {
-
+    public List<Alarm> findCurrentAlarms() {
+        return alarmRepository.findCurrentAlarms();
     }
 
     @Override
-    public Alarm findByPrimarySubject(Map<String, Object> primarySubject) {
-        return alarmRepository.findByPrimarySubject(primarySubject);
+    public Alarm findCurrentByDomainAndPrimarySubject(String domain, Map<String, Object> primarySubject) {
+        return alarmRepository.findCurrentByDomainAndPrimarySubject(domain, primarySubject);
     }
 }

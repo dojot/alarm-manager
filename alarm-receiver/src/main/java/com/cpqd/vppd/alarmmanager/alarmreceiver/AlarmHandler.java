@@ -1,6 +1,5 @@
 package com.cpqd.vppd.alarmmanager.alarmreceiver;
 
-import com.cpqd.vppd.alarmmanager.core.exception.AlarmNotPresentException;
 import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmException;
 import com.cpqd.vppd.alarmmanager.core.exception.UnknownAlarmMetaModelException;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModel;
@@ -48,28 +47,21 @@ public class AlarmHandler {
             return;
         }
 
-        // handle alarm
-        if (AlarmSeverity.Clear.equals(alarmEvent.getSeverity())) {
-            // TODO alarm disappearance
-            try {
-                alarmServices.clear(alarmEvent.getPrimarySubject(), alarmEvent.getEventTimestamp());
-            } catch (AlarmNotPresentException e) {
-                LOGGER.warn("Received disappearance event for an alarm that was not present");
-            }
-        } else {
-            // alarm appearance or update
-            // check if the alarm is already present
-            Alarm existingAlarm = alarmServices.findByPrimarySubject(alarmEvent.getPrimarySubject());
-            Alarm receivedAlarm = Alarm.fromAlarmEvent(alarmEvent, existingAlarm == null);
+        Alarm existingAlarm = alarmServices.findCurrentByDomainAndPrimarySubject(alarmEvent.getDomain(),
+                alarmEvent.getPrimarySubject());
 
-            if (existingAlarm != null) {
-                LOGGER.debug("Received event is an update for an existing alarm");
-                alarmServices.update(receivedAlarm);
-            } else {
-                // the alarm does not exist in the system, add it
-                LOGGER.debug("Received event will be persisted as a new alarm");
-                alarmServices.add(receivedAlarm);
-            }
+        if (existingAlarm == null) {
+            // the alarm does not exist in the system, add it
+            Alarm receivedAlarm = Alarm.newFromAlarmEvent(alarmEvent);
+
+            LOGGER.debug("Received event will be persisted as a new alarm");
+            alarmServices.add(receivedAlarm);
+        } else {
+            // update the existing alarm with the data from the event
+            existingAlarm.updateWithEvent(alarmEvent);
+
+            LOGGER.debug("Received event is an update for an existing alarm");
+            alarmServices.update(existingAlarm);
         }
     }
 
@@ -100,6 +92,7 @@ public class AlarmHandler {
         }
 
         if (alarmEvent.getAdditionalData() != null) {
+            // additional data is optional
             if (!validateDomainSpecificFieldsAgainstMetaModel(metaModel.getAdditionalData(),
                     alarmEvent.getAdditionalData())) {
                 LOGGER.error("Received alarm event's additional data does not match specified meta model.");

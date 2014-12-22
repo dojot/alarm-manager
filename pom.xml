@@ -16,6 +16,7 @@
         <module>core</module>
         <module>utils</module>
         <module>mongo-connector</module>
+        <module>alarm-query</module>
     </modules>
 
     <!-- Some properties to be (re)used in this pom.xml and its children, if necessary -->
@@ -43,8 +44,8 @@
 
     <build>
         <plugins>
-            <!-- Compiler plugin. Besides defining the project will be compiled with Java 1.7, it also configures groovy. 
-                This is necessary to run Spock tests -->
+            <!-- Compiler plugin. Besides defining the project will be compiled with Java 1.7,
+                it also configures groovy. This is necessary to run Spock tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -135,6 +136,12 @@
                 <version>${project.version}</version>
                 <type>test-jar</type>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.cpqd.vppd.alarm-manager</groupId>
+                <artifactId>alarm-query</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
             </dependency>
 
             <!-- Library dependencies -->

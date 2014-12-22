@@ -5,6 +5,7 @@ import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 
 import javax.ejb.Local;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,7 +17,7 @@ public interface AlarmServices {
 
     void update(Alarm alarm);
 
-    void clear(Map<String, Object> primarySubject, Date reportedDisappearanceTimestamp) throws AlarmNotPresentException;
+    List<Alarm> findCurrentAlarms();
 
-    Alarm findByPrimarySubject(Map<String, Object> primarySubject);
+    Alarm findCurrentByDomainAndPrimarySubject(String domain, Map<String, Object> primarySubject);
 }

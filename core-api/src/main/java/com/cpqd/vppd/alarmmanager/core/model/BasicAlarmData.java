@@ -17,23 +17,23 @@ import java.util.TreeMap;
 public abstract class BasicAlarmData {
     @Id
     @ObjectId
-    private String id;
+    protected String id;
 
     @NotNull
-    private String domain;
+    protected String domain;
 
-    private String description;
+    protected String description;
 
     @NotNull
-    private AlarmSeverity severity;
+    protected AlarmSeverity severity;
 
     @NotNull
     @NotEmpty
     @JsonDeserialize(as = TreeMap.class)
-    private Map<String, Object> primarySubject;
+    protected Map<String, Object> primarySubject;
 
     @JsonDeserialize(as = TreeMap.class)
-    private Map<String, Object> additionalData;
+    protected Map<String, Object> additionalData;
 
     public BasicAlarmData() {
 

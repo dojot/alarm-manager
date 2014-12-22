@@ -24,11 +24,11 @@
             <artifactId>alarm-receiver</artifactId>
             <type>ejb</type>
         </dependency>
-        <!-- <dependency>
-            <groupId>com.cpqd.drc.sdcc.appserver</groupId>
-            <artifactId>hcibridge</artifactId>
+        <dependency>
+            <groupId>com.cpqd.vppd.alarm-manager</groupId>
+            <artifactId>alarm-query</artifactId>
             <type>war</type>
-        </dependency> -->
+        </dependency>
     </dependencies>
 
     <build>
@@ -45,11 +45,11 @@
                     <defaultLibBundleDir>lib</defaultLibBundleDir>
                     <modules>
                         <!-- web context -->
-                        <!-- <webModule>
-                            <groupId>com.cpqd.drc.sdcc.appserver</groupId>
-                            <artifactId>instructionreceiver</artifactId>
-                            <contextRoot>/instructionreceiver</contextRoot>
-                        </webModule> -->
+                        <webModule>
+                            <groupId>com.cpqd.vppd.alarm-manager</groupId>
+                            <artifactId>alarm-query</artifactId>
+                            <contextRoot>/alarms</contextRoot>
+                        </webModule>
                     </modules>
                     <fileNameMapping>no-version</fileNameMapping>
                 </configuration>
