@@ -1,5 +1,6 @@
 package com.cpqd.vppd.alarmmanager.alarmreceiver;
 
+import com.cpqd.vppd.alarmmanager.core.event.AlarmUpdateEvent;
 import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmException;
 import com.cpqd.vppd.alarmmanager.core.exception.UnknownAlarmMetaModelException;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModel;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ejb.Stateless;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -39,6 +41,10 @@ public class AlarmHandler {
     @Inject
     private Validator alarmValidator;
 
+    @Inject
+    @AlarmUpdateEvent
+    Event<Alarm> alarmEventDispatcher;
+
     public void handleAlarmEvent(AlarmEvent alarmEvent) {
         try {
             validateAlarm(alarmEvent);
@@ -49,20 +55,25 @@ public class AlarmHandler {
 
         Alarm existingAlarm = alarmServices.findCurrentByDomainAndPrimarySubject(alarmEvent.getDomain(),
                 alarmEvent.getPrimarySubject());
+        Alarm persistedAlarm;
 
         if (existingAlarm == null) {
             // the alarm does not exist in the system, add it
-            Alarm receivedAlarm = Alarm.newFromAlarmEvent(alarmEvent);
+            persistedAlarm = Alarm.newFromAlarmEvent(alarmEvent);
 
             LOGGER.debug("Received event will be persisted as a new alarm");
-            alarmServices.add(receivedAlarm);
+            alarmServices.add(persistedAlarm);
         } else {
             // update the existing alarm with the data from the event
             existingAlarm.updateWithEvent(alarmEvent);
+            persistedAlarm = existingAlarm;
 
             LOGGER.debug("Received event is an update for an existing alarm");
-            alarmServices.update(existingAlarm);
+            alarmServices.update(persistedAlarm);
         }
+
+        // fire an event indicating there's been an alarm update so interested parties are notified
+        alarmEventDispatcher.fire(persistedAlarm);
     }
 
     private void validateAlarm(AlarmEvent alarmEvent) throws InvalidAlarmException {

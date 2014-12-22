@@ -2,6 +2,7 @@ package com.cpqd.vppd.alarmmanager.core.services.impl;
 
 import com.cpqd.vppd.alarmmanager.core.exception.AlarmNotPresentException;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
+import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 import com.cpqd.vppd.alarmmanager.core.repository.impl.AlarmRepository;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
 
@@ -31,8 +32,8 @@ public class AlarmServicesImpl implements AlarmServices {
     }
 
     @Override
-    public List<Alarm> findCurrentAlarms() {
-        return alarmRepository.findCurrentAlarms();
+    public List<Alarm> findCurrentAlarms(AlarmSeverity severity, Date from, Date to) {
+        return alarmRepository.findCurrentAlarms(severity, from, to);
     }
 
     @Override
