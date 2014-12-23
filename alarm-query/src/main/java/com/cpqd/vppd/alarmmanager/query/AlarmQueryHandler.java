@@ -19,7 +19,7 @@ public class AlarmQueryHandler {
     @Inject
     AlarmServices alarmServices;
 
-    List<Alarm> getCurrentAlarms(AlarmSeverity severity, Date from, Date to) {
-        return alarmServices.findCurrentAlarms(severity, from, to);
+    List<Alarm> getCurrentAlarms(List<AlarmSeverity> severities, Date from, Date to) {
+        return alarmServices.findCurrentAlarms(severities, from, to);
     }
 }

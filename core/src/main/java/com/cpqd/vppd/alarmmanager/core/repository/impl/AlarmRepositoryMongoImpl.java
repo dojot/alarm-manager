@@ -12,10 +12,7 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Repository bean for CRUD operations on alarms.
@@ -41,32 +38,51 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
 
     @Override
     public List<Alarm> findCurrentAlarms(AlarmSeverity severity, Date from, Date to) {
+        return findCurrentAlarms(Arrays.asList(new AlarmSeverity[] { severity }), from, to);
+    }
+
+    @Override
+    public List<Alarm> findCurrentAlarms(List<AlarmSeverity> severities, Date from, Date to) {
         List<Object> parameters = new ArrayList<>();
 
-        StringBuilder query = new StringBuilder("{ disappearance: null");
-        if (severity != null) {
-            query.append(", severity: #");
-            parameters.add(severity);
+        StringBuilder queryBuilder = new StringBuilder("{ disappearance: null");
+        if (severities != null && !severities.isEmpty()) {
+            queryBuilder.append(", severity: { $in: [");
+            boolean firstSeverity = true;
+            for (AlarmSeverity severity : severities) {
+                if (firstSeverity) {
+                    firstSeverity = false;
+                } else {
+                    queryBuilder.append(", ");
+                }
+                queryBuilder.append("#");
+                parameters.add(severity);
+            }
+            queryBuilder.append("] }");
         }
         if (from != null || to != null) {
-            query.append(", appearance: { ");
+            queryBuilder.append(", appearance: { ");
             if (from != null) {
-                query.append("$gte: #");
+                queryBuilder.append("$gte: #");
                 parameters.add(from);
                 if (to != null) {
-                    query.append(", ");
+                    queryBuilder.append(", ");
                 }
             }
             if (to != null) {
-                query.append("$lte: #");
+                queryBuilder.append("$lte: #");
                 parameters.add(to);
             }
-            query.append(" }");
+            queryBuilder.append(" }");
         }
-        query.append(" }");
+        queryBuilder.append(" }");
 
-        try (MongoCursor<Alarm> currentAlarmsCursor = alarmsCollection.find(query.toString(),
-                parameters.toArray()).as(Alarm.class)) {
+        String query = queryBuilder.toString();
+
+        LOGGER.debug("Query to run in MongoDB: '{}'", query);
+
+        try (MongoCursor<Alarm> currentAlarmsCursor = alarmsCollection.find(query,
+                parameters.toArray()).sort("{ appearance: -1 }").as(Alarm.class)) {
 
             return Lists.newArrayList(currentAlarmsCursor.iterator());
         } catch (IOException e) {

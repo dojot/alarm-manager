@@ -3,6 +3,8 @@ package com.cpqd.vppd.alarmmanager.query;
 import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmJsonException;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -31,20 +33,29 @@ public class AlarmQueryEndpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(AlarmQueryEndpoint.class);
 
     @Inject
-    AlarmQueryHandler alarmQueryHandler;
+    private AlarmQueryHandler alarmQueryHandler;
 
     @GET
-    public Response getCurrentAlarms(@QueryParam("severity") final String severity,
+    public Response getCurrentAlarms(@QueryParam("severity") final List<String> severitiesAsString,
                                      @QueryParam("from") final Long from,
                                      @QueryParam("to") final Long to) throws InvalidAlarmJsonException {
         LOGGER.debug("[] +getCurrentAlarms");
 
         // convert filters into expected data types
-        AlarmSeverity severityEnum = severity != null ? AlarmSeverity.valueOf(severity) : null;
+        List<AlarmSeverity> severities = null;
+        if (severitiesAsString != null && !severitiesAsString.isEmpty()) {
+            severities = Lists.transform(severitiesAsString, new Function<String, AlarmSeverity>() {
+                @Override
+                public AlarmSeverity apply(String severityAsString) {
+                    return AlarmSeverity.valueOf(severityAsString);
+                }
+            });
+        }
+
         Date fromDate = from != null ? new DateTime(from, DateTimeZone.UTC).toDate() : null;
         Date toDate = to != null ? new DateTime(to, DateTimeZone.UTC).toDate() : null;
 
-        List<Alarm> alarms = alarmQueryHandler.getCurrentAlarms(severityEnum, fromDate, toDate);
+        List<Alarm> alarms = alarmQueryHandler.getCurrentAlarms(severities, fromDate, toDate);
 
         LOGGER.debug("[] -getCurrentAlarms");
 

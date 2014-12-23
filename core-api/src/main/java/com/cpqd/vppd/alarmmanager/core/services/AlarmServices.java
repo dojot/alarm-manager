@@ -18,7 +18,7 @@ public interface AlarmServices {
 
     void update(Alarm alarm);
 
-    List<Alarm> findCurrentAlarms(AlarmSeverity severity, Date from, Date to);
+    List<Alarm> findCurrentAlarms(List<AlarmSeverity> severities, Date from, Date to);
 
     Alarm findCurrentByDomainAndPrimarySubject(String domain, Map<String, Object> primarySubject);
 }

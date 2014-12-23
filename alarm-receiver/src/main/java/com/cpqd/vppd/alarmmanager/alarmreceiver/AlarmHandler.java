@@ -1,14 +1,12 @@
 package com.cpqd.vppd.alarmmanager.alarmreceiver;
 
 import com.cpqd.vppd.alarmmanager.core.event.AlarmUpdateEvent;
+import com.cpqd.vppd.alarmmanager.core.event.WBAlarmUpdateEvent;
 import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmException;
 import com.cpqd.vppd.alarmmanager.core.exception.UnknownAlarmMetaModelException;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModel;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModelManager;
-import com.cpqd.vppd.alarmmanager.core.model.Alarm;
-import com.cpqd.vppd.alarmmanager.core.model.AlarmEvent;
-import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
-import com.cpqd.vppd.alarmmanager.core.model.DomainSpecificField;
+import com.cpqd.vppd.alarmmanager.core.model.*;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +40,8 @@ public class AlarmHandler {
     private Validator alarmValidator;
 
     @Inject
-    @AlarmUpdateEvent
-    Event<Alarm> alarmEventDispatcher;
+    @WBAlarmUpdateEvent
+    Event<AlarmUpdateEvent> alarmEventDispatcher;
 
     public void handleAlarmEvent(AlarmEvent alarmEvent) {
         try {
@@ -53,27 +51,57 @@ public class AlarmHandler {
             return;
         }
 
-        Alarm existingAlarm = alarmServices.findCurrentByDomainAndPrimarySubject(alarmEvent.getDomain(),
-                alarmEvent.getPrimarySubject());
+        // aux variables
+        AlarmSeverity eventSeverity = alarmEvent.getSeverity();
+        AlarmOccurrence occurrence;
         Alarm persistedAlarm;
 
+        // check if there is already a current alarm with the received primary key
+        Alarm existingAlarm = alarmServices.findCurrentByDomainAndPrimarySubject(alarmEvent.getDomain(),
+                alarmEvent.getPrimarySubject());
+
         if (existingAlarm == null) {
-            // the alarm does not exist in the system, add it
-            persistedAlarm = Alarm.newFromAlarmEvent(alarmEvent);
+            if (!AlarmSeverity.Clear.equals(eventSeverity)) {
+                // the alarm does not exist in the system, add it
+                occurrence = AlarmOccurrence.Appearance;
+                persistedAlarm = Alarm.newFromAlarmEvent(alarmEvent);
 
-            LOGGER.debug("Received event will be persisted as a new alarm");
-            alarmServices.add(persistedAlarm);
+                LOGGER.debug("Received event will be persisted as a new alarm");
+                alarmServices.add(persistedAlarm);
+            } else {
+                LOGGER.warn("Received disappearance event for an unknown alarm. Event discarded");
+                return;
+            }
         } else {
-            // update the existing alarm with the data from the event
-            existingAlarm.updateWithEvent(alarmEvent);
-            persistedAlarm = existingAlarm;
+            if (AlarmSeverity.Warning.equals(existingAlarm.getSeverity())) {
+                // cannot change a persisted warning alarm
+                LOGGER.warn("Unsupported update event for a warning alarm. Event discarded");
+                return;
+            }
 
-            LOGGER.debug("Received event is an update for an existing alarm");
-            alarmServices.update(persistedAlarm);
+            if (AlarmSeverity.Warning.equals(eventSeverity)) {
+                // cannot change an existing alarm to warning severity
+                LOGGER.warn("Received event attempted an illegal severity update. Event discarded");
+                return;
+            }
+
+            // update the existing alarm with the data from the event and save it
+            existingAlarm.updateWithEvent(alarmEvent);
+            alarmServices.update(existingAlarm);
+
+            if (AlarmSeverity.Clear.equals(eventSeverity)) {
+                occurrence = AlarmOccurrence.Disappearance;
+            } else {
+                occurrence = AlarmOccurrence.Update;
+            }
+            LOGGER.debug("Received event is {} for an existing alarm",
+                    AlarmOccurrence.Update.equals(occurrence) ? "an update" : "a disappearance");
+
+            persistedAlarm = existingAlarm;
         }
 
         // fire an event indicating there's been an alarm update so interested parties are notified
-        alarmEventDispatcher.fire(persistedAlarm);
+        alarmEventDispatcher.fire(new AlarmUpdateEvent(occurrence, persistedAlarm));
     }
 
     private void validateAlarm(AlarmEvent alarmEvent) throws InvalidAlarmException {

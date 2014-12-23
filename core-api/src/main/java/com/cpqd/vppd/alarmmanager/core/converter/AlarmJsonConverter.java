@@ -1,7 +1,6 @@
 package com.cpqd.vppd.alarmmanager.core.converter;
 
 import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmJsonException;
-import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,9 +20,9 @@ public class AlarmJsonConverter {
         jsonMapper.registerModule(new JodaModule());
     }
 
-    public String toJson(Alarm alarm) throws InvalidAlarmJsonException {
+    public String toJson(Object object) throws InvalidAlarmJsonException {
         try {
-            return jsonMapper.writeValueAsString(alarm);
+            return jsonMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             throw new InvalidAlarmJsonException(e);
         }

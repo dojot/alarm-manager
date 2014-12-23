@@ -19,5 +19,7 @@ public interface AlarmRepository {
 
     public List<Alarm> findCurrentAlarms(AlarmSeverity severity, Date from, Date to);
 
+    public List<Alarm> findCurrentAlarms(List<AlarmSeverity> severities, Date from, Date to);
+
     public Alarm findCurrentByDomainAndPrimarySubject(String domain, Map<String, Object> primarySubject);
 }

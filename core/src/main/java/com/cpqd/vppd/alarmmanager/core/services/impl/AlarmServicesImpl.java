@@ -32,8 +32,8 @@ public class AlarmServicesImpl implements AlarmServices {
     }
 
     @Override
-    public List<Alarm> findCurrentAlarms(AlarmSeverity severity, Date from, Date to) {
-        return alarmRepository.findCurrentAlarms(severity, from, to);
+    public List<Alarm> findCurrentAlarms(List<AlarmSeverity> severities, Date from, Date to) {
+        return alarmRepository.findCurrentAlarms(severities, from, to);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.cpqd.vppd.alarmmanager.signaling;
 
 import com.cpqd.vppd.alarmmanager.core.converter.AlarmJsonConverter;
 import com.cpqd.vppd.alarmmanager.core.event.AlarmUpdateEvent;
+import com.cpqd.vppd.alarmmanager.core.event.WBAlarmUpdateEvent;
 import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmJsonException;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import org.slf4j.Logger;
@@ -53,15 +54,15 @@ public class AlarmWebSocketSignaling {
 
     /**
      * Method called by the container
-     * @param alarm
+     * @param alarmUpdateEvent
      */
-    public void onAlarmUpdateEvent(@Observes @AlarmUpdateEvent Alarm alarm) {
+    public void onAlarmUpdateEvent(@Observes @WBAlarmUpdateEvent AlarmUpdateEvent alarmUpdateEvent) {
         if (!connectedPeers.isEmpty()) {
             LOGGER.info("Alarm update event observed. Notifying connected peers");
 
             String updateJson;
             try {
-                updateJson = alarmJsonConverter.toJson(alarm);
+                updateJson = alarmJsonConverter.toJson(alarmUpdateEvent);
             } catch (InvalidAlarmJsonException e) {
                 LOGGER.error("Unable to convert alarm update event to JSON. Listeners will not be notified.");
                 return;
