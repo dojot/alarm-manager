@@ -2,6 +2,8 @@ package com.cpqd.vppd.alarmmanager.core.repository.impl;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
+import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
+import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryParameters;
 import com.cpqd.vppd.alarmmanager.mongoconnector.annotation.JongoCollection;
 import com.google.common.collect.Lists;
 import org.jongo.MongoCollection;
@@ -12,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Repository bean for CRUD operations on alarms.
@@ -37,41 +41,44 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
     }
 
     @Override
-    public List<Alarm> findCurrentAlarms(AlarmSeverity severity, Date from, Date to) {
-        return findCurrentAlarms(Arrays.asList(new AlarmSeverity[] { severity }), from, to);
-    }
-
-    @Override
-    public List<Alarm> findCurrentAlarms(List<AlarmSeverity> severities, Date from, Date to) {
-        List<Object> parameters = new ArrayList<>();
+    public List<Alarm> findCurrentAlarms(CurrentAlarmsQueryParameters parameters) {
+        List<Object> queryParams = new ArrayList<>();
 
         StringBuilder queryBuilder = new StringBuilder("{ disappearance: null");
-        if (severities != null && !severities.isEmpty()) {
+        if (parameters.getLastId() != null) {
+            queryBuilder.append(", _id: { $lt: # }");
+            queryParams.add(parameters.getLastId());
+        }
+        if (parameters.getText() != null) {
+            queryBuilder.append(", $text: { $search: # }");
+            queryParams.add(parameters.getText());
+        }
+        if (parameters.getSeverities() != null && !parameters.getSeverities().isEmpty()) {
             queryBuilder.append(", severity: { $in: [");
             boolean firstSeverity = true;
-            for (AlarmSeverity severity : severities) {
+            for (AlarmSeverity severity : parameters.getSeverities()) {
                 if (firstSeverity) {
                     firstSeverity = false;
                 } else {
                     queryBuilder.append(", ");
                 }
                 queryBuilder.append("#");
-                parameters.add(severity);
+                queryParams.add(severity);
             }
             queryBuilder.append("] }");
         }
-        if (from != null || to != null) {
+        if (parameters.getFrom() != null || parameters.getTo() != null) {
             queryBuilder.append(", appearance: { ");
-            if (from != null) {
+            if (parameters.getFrom() != null) {
                 queryBuilder.append("$gte: #");
-                parameters.add(from);
-                if (to != null) {
+                queryParams.add(parameters.getFrom());
+                if (parameters.getTo() != null) {
                     queryBuilder.append(", ");
                 }
             }
-            if (to != null) {
+            if (parameters.getTo() != null) {
                 queryBuilder.append("$lte: #");
-                parameters.add(to);
+                queryParams.add(parameters.getTo());
             }
             queryBuilder.append(" }");
         }
@@ -81,8 +88,11 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
 
         LOGGER.debug("Query to run in MongoDB: '{}'", query);
 
-        try (MongoCursor<Alarm> currentAlarmsCursor = alarmsCollection.find(query,
-                parameters.toArray()).sort("{ appearance: -1 }").as(Alarm.class)) {
+        try (MongoCursor<Alarm> currentAlarmsCursor = alarmsCollection
+                .find(query, queryParams.toArray())
+                .sort("{ _id: -1 }")
+                .limit(parameters.getMaxResults() != null ? parameters.getMaxResults().intValue() : 0)
+                .as(Alarm.class)) {
 
             return Lists.newArrayList(currentAlarmsCursor.iterator());
         } catch (IOException e) {

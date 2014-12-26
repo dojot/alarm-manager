@@ -1,0 +1,2 @@
+db.alarms.ensureIndex({ '$**': 'text' }, { name: 'TextIndex' });
+db.alarms.ensureIndex({ 'disappearance': 1 }, { expireAfterSeconds: 432000 });

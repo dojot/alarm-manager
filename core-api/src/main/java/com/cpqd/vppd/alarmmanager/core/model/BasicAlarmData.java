@@ -2,9 +2,9 @@ package com.cpqd.vppd.alarmmanager.core.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableMap;
+import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.jongo.marshall.jackson.oid.Id;
-import org.jongo.marshall.jackson.oid.ObjectId;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -16,8 +16,7 @@ import java.util.TreeMap;
  */
 public abstract class BasicAlarmData {
     @Id
-    @ObjectId
-    protected String id;
+    protected ObjectId id;
 
     @NotNull
     protected String domain;
@@ -47,11 +46,11 @@ public abstract class BasicAlarmData {
         this.additionalData = ImmutableMap.copyOf(other.additionalData);
     }
 
-    public String getId() {
+    public org.bson.types.ObjectId getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(org.bson.types.ObjectId id) {
         this.id = id;
     }
 

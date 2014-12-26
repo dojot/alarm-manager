@@ -1,10 +1,8 @@
-package com.cpqd.vppd.alarmmanager.core.repository.impl;
+package com.cpqd.vppd.alarmmanager.core.repository;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
-import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 
 import javax.ejb.Local;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +15,7 @@ public interface AlarmRepository {
 
     public void update(Alarm alarm);
 
-    public List<Alarm> findCurrentAlarms(AlarmSeverity severity, Date from, Date to);
-
-    public List<Alarm> findCurrentAlarms(List<AlarmSeverity> severities, Date from, Date to);
+    public List<Alarm> findCurrentAlarms(CurrentAlarmsQueryParameters parameters);
 
     public Alarm findCurrentByDomainAndPrimarySubject(String domain, Map<String, Object> primarySubject);
 }

@@ -3,6 +3,7 @@ package com.cpqd.vppd.alarmmanager.core.services;
 import com.cpqd.vppd.alarmmanager.core.exception.AlarmNotPresentException;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
+import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryParameters;
 
 import javax.ejb.Local;
 import java.util.Date;
@@ -18,7 +19,7 @@ public interface AlarmServices {
 
     void update(Alarm alarm);
 
-    List<Alarm> findCurrentAlarms(List<AlarmSeverity> severities, Date from, Date to);
+    List<Alarm> findCurrentAlarms(CurrentAlarmsQueryParameters parameters);
 
     Alarm findCurrentByDomainAndPrimarySubject(String domain, Map<String, Object> primarySubject);
 }

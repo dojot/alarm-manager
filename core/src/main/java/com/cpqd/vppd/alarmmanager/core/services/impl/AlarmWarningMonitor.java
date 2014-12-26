@@ -3,7 +3,8 @@ package com.cpqd.vppd.alarmmanager.core.services.impl;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmDisappearanceReason;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
-import com.cpqd.vppd.alarmmanager.core.repository.impl.AlarmRepository;
+import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
+import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryParameters;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class AlarmWarningMonitor {
     @Inject
     private AlarmRepository alarmRepository;
 
-    @Schedule(hour = "*", minute = "*/5")
+    @Schedule(hour = "*", minute = "*/5", persistent = false)
     public void runWarningDisappearanceJob() {
         LOGGER.info("Running warning disappearance job");
 
@@ -40,7 +41,8 @@ public class AlarmWarningMonitor {
         Date maxAppearanceDate = DateTime.now(DateTimeZone.UTC).minusMinutes(5).toDate();
 
         // find current warning alarms that appeared at least five minutes ago
-        List<Alarm> currentWarnings = alarmRepository.findCurrentAlarms(AlarmSeverity.Warning, null, maxAppearanceDate);
+        List<Alarm> currentWarnings = alarmRepository.findCurrentAlarms(
+                new CurrentAlarmsQueryParameters(AlarmSeverity.Warning, maxAppearanceDate));
 
         for (Alarm alarm : currentWarnings) {
             Date disappearance = new DateTime(alarm.getAppearance().getTime(), DateTimeZone.UTC).plusMinutes(5).toDate();
