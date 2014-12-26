@@ -1,6 +1,7 @@
 package com.cpqd.vppd.alarmmanager.core.repository;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
+import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 
 import javax.ejb.Local;
 import java.util.List;
@@ -14,6 +15,8 @@ public interface AlarmRepository {
     public void add(Alarm alarm);
 
     public void update(Alarm alarm);
+
+    public Map<AlarmSeverity, Long> getAlarmCountersBySeverity();
 
     public List<Alarm> findCurrentAlarms(CurrentAlarmsQueryParameters parameters);
 

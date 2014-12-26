@@ -53,6 +53,7 @@ public class AlarmHandler {
 
         // aux variables
         AlarmSeverity eventSeverity = alarmEvent.getSeverity();
+        AlarmSeverity previousSeverity = null;
         AlarmOccurrence occurrence;
         Alarm persistedAlarm;
 
@@ -85,15 +86,17 @@ public class AlarmHandler {
                 return;
             }
 
-            // update the existing alarm with the data from the event and save it
-            existingAlarm.updateWithEvent(alarmEvent);
-            alarmServices.update(existingAlarm);
-
             if (AlarmSeverity.Clear.equals(eventSeverity)) {
                 occurrence = AlarmOccurrence.Disappearance;
             } else {
                 occurrence = AlarmOccurrence.Update;
+                previousSeverity = existingAlarm.getSeverity();
             }
+
+            // update the existing alarm with the data from the event and save it
+            existingAlarm.updateWithEvent(alarmEvent);
+            alarmServices.update(existingAlarm);
+
             LOGGER.debug("Received event is {} for an existing alarm",
                     AlarmOccurrence.Update.equals(occurrence) ? "an update" : "a disappearance");
 
@@ -101,7 +104,7 @@ public class AlarmHandler {
         }
 
         // fire an event indicating there's been an alarm update so interested parties are notified
-        alarmEventDispatcher.fire(new AlarmUpdateEvent(occurrence, persistedAlarm));
+        alarmEventDispatcher.fire(new AlarmUpdateEvent(occurrence, previousSeverity, persistedAlarm));
     }
 
     private void validateAlarm(AlarmEvent alarmEvent) throws InvalidAlarmException {

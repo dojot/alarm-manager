@@ -1,11 +1,13 @@
 package com.cpqd.vppd.alarmmanager.core.repository.impl;
 
+import com.cpqd.vppd.alarmmanager.core.model.metadata.CountBySeverity;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
 import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryParameters;
 import com.cpqd.vppd.alarmmanager.mongoconnector.annotation.JongoCollection;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.jongo.MongoCollection;
 import org.jongo.MongoCursor;
 import org.slf4j.Logger;
@@ -15,6 +17,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +41,21 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
     @Override
     public void update(Alarm alarm) {
         alarmsCollection.save(alarm);
+    }
+
+    @Override
+    public Map<AlarmSeverity, Long> getAlarmCountersBySeverity() {
+        List<CountBySeverity> aggregationResult = alarmsCollection.aggregate("{ $match: { disappearance: null } }")
+                .and("{ $group: { _id: '$severity', count: { $sum: 1 } } }")
+                .as(CountBySeverity.class);
+
+        Map<AlarmSeverity, Long> counters = new HashMap<>();
+
+        for (CountBySeverity countBySeverity : aggregationResult) {
+            counters.put(countBySeverity.getSeverity(), countBySeverity.getCount());
+        }
+
+        return counters;
     }
 
     @Override

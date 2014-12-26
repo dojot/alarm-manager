@@ -5,9 +5,12 @@ import com.cpqd.vppd.alarmmanager.core.event.AlarmUpdateEvent;
 import com.cpqd.vppd.alarmmanager.core.event.WBAlarmUpdateEvent;
 import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmJsonException;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
+import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
+import com.cpqd.vppd.alarmmanager.core.services.AlarmMetadataServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Priority;
 import javax.ejb.Singleton;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -16,9 +19,7 @@ import javax.websocket.OnClose;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Class for alarm updates signaling through a WebSocket.
@@ -33,6 +34,9 @@ public class AlarmWebSocketSignaling {
 
     @Inject
     private AlarmJsonConverter alarmJsonConverter;
+
+    @Inject
+    private AlarmMetadataServices alarmMetadataServices;
 
     /**
      * Set that holds all the connected sessions.
@@ -57,12 +61,21 @@ public class AlarmWebSocketSignaling {
      * @param alarmUpdateEvent
      */
     public void onAlarmUpdateEvent(@Observes @WBAlarmUpdateEvent AlarmUpdateEvent alarmUpdateEvent) {
+        // FIXME if the priority of the observers is undefined, we may obtain
+        // FIXME information that is not up to date
         if (!connectedPeers.isEmpty()) {
             LOGGER.info("Alarm update event observed. Notifying connected peers");
 
+            Map<AlarmSeverity, Long> metadata = alarmMetadataServices.getCurrentAlarmsMetadata();
+            Map<String, Object> notification = new HashMap<>();
+
+            notification.put("event", alarmUpdateEvent.getEvent());
+            notification.put("alarm", alarmUpdateEvent.getAlarm());
+            notification.put("metadata", metadata);
+
             String updateJson;
             try {
-                updateJson = alarmJsonConverter.toJson(alarmUpdateEvent);
+                updateJson = alarmJsonConverter.toJson(notification);
             } catch (InvalidAlarmJsonException e) {
                 LOGGER.error("Unable to convert alarm update event to JSON. Listeners will not be notified.");
                 return;

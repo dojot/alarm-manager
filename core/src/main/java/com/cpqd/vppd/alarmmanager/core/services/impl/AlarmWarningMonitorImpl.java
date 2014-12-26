@@ -22,12 +22,12 @@ import java.util.List;
  */
 @Singleton
 @Startup
-public class AlarmWarningMonitor {
+public class AlarmWarningMonitorImpl {
 
     /**
      * Logger.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(AlarmWarningMonitor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlarmWarningMonitorImpl.class);
 
     @Inject
     private AlarmRepository alarmRepository;

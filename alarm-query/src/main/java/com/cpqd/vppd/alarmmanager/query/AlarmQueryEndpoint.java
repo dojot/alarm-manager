@@ -20,7 +20,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST endpoints for alarm queries.
@@ -52,10 +54,10 @@ public class AlarmQueryEndpoint {
         CurrentAlarmsQueryParameters parameters = new CurrentAlarmsQueryParameters(severitiesAsString,
                 from, to, text, lastId, maxResults);
 
-        List<Alarm> alarms = alarmQueryHandler.getCurrentAlarms(parameters);
+        Map<String, Object> responseBody = alarmQueryHandler.getCurrentAlarmsAndMetadata(parameters);
 
         LOGGER.debug("[] -getCurrentAlarms");
 
-        return Response.ok().entity(alarmJsonConverter.toJson(alarms)).build();
+        return Response.ok().entity(alarmJsonConverter.toJson(responseBody)).build();
     }
 }
