@@ -4,6 +4,7 @@ import com.cpqd.vppd.alarmmanager.core.model.DomainSpecificField;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.base.Strings;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -35,7 +36,7 @@ public class AlarmMetaModel {
     }
 
     public void setNamespace(String namespace) {
-        this.namespace = namespace;
+        this.namespace = Strings.nullToEmpty(namespace);
     }
 
     public Set<DomainSpecificField> getPrimarySubject() {

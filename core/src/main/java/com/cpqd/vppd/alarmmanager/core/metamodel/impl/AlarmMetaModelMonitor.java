@@ -67,7 +67,23 @@ public class AlarmMetaModelMonitor {
                 AlarmMetaModel metaModel = metaModelXmlConverter.fromXml(xml);
 
                 // register metamodel
-                metaModelManager.addOrUpdateMetaModel(metaModel);
+                String baseFileName = FilenameUtils.getBaseName(file.getName());
+                String domain = StringUtils.substringAfterLast(baseFileName, ".");
+                String namespace = "";
+                if (StringUtils.isBlank(domain)) {
+                    // file name does not contain dots, the whole name is the domain
+                    domain = baseFileName;
+                } else {
+                    namespace = StringUtils.substringBeforeLast(baseFileName, ".");
+                }
+
+                if (((StringUtils.isBlank(namespace) && StringUtils.isBlank(metaModel.getNamespace())) || namespace.equals(metaModel.getNamespace()))
+                        && domain.equals(metaModel.getDomain())) {
+                    metaModelManager.addOrUpdateMetaModel(metaModel);
+                } else {
+                    LOGGER.error("Namespace or domain specified in file contents do not" +
+                            " match the ones extracted from the file name. Metamodel ignored");
+                }
             } catch (IOException | InvalidAlarmMetaModelXmlException e) {
                 LOGGER.error("Error parsing XML file {}: {}", file.getName(), e.getMessage());
             }
@@ -113,10 +129,12 @@ public class AlarmMetaModelMonitor {
                                         if (StandardWatchEventKinds.ENTRY_DELETE.name().equals(eventKind.name())) {
                                             // deregister metamodel extracted from the deleted file name
                                             try {
-                                                metaModelManager.deleteMetaModelForDomain(domain);
-                                                LOGGER.info("Metamodel for domain {} removed from known models", domain);
+                                                metaModelManager.deleteMetaModelForNamespaceAndDomain(namespace, domain);
+                                                LOGGER.info("Metamodel for namespace '{}' and domain '{}' removed" +
+                                                        " from known models", namespace, domain);
                                             } catch (UnknownAlarmMetaModelException e) {
-                                                LOGGER.warn("Metamodel for domain {} was not registered", domain);
+                                                LOGGER.warn("Metamodel for namespace '{}' and domain '{}' was" +
+                                                        " not registered", namespace, domain);
                                             }
 
                                         } else if (StandardWatchEventKinds.ENTRY_CREATE.name().equals(eventKind.name())
@@ -134,13 +152,14 @@ public class AlarmMetaModelMonitor {
                                                 continue;
                                             }
 
-                                            // validate if the domain specified in the file contents matches the domain extracted
-                                            // from the file name
-                                            if (domain.equals(metaModel.getDomain())) {
+                                            // validate if the namespace and domain specified in the file contents
+                                            // match the ones extracted from the file name
+                                            if (((StringUtils.isBlank(namespace) && StringUtils.isBlank(metaModel.getNamespace())) || namespace.equals(metaModel.getNamespace()))
+                                                    && domain.equals(metaModel.getDomain())) {
                                                 metaModelManager.addOrUpdateMetaModel(metaModel);
                                             } else {
-                                                LOGGER.error("Domain specified in file contents does not match domain extracted" +
-                                                        " from the file name. Metamodel ignored");
+                                                LOGGER.error("Namespace or domain specified in file contents do not" +
+                                                        " match the ones extracted from the file name. Metamodel ignored");
                                             }
                                         }
                                     } else {

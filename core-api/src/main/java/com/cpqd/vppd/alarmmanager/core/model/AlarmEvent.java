@@ -13,6 +13,9 @@ public class AlarmEvent extends BasicAlarmData {
     @NotNull
     private Date eventTimestamp;
 
+    /**
+     * Free text describing what caused the alarm to disappear. May be sent by the client.
+     */
     private String disappearanceReason;
 
     public Date getEventTimestamp() {

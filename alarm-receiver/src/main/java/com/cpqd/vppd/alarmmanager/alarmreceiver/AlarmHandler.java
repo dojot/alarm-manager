@@ -58,8 +58,7 @@ public class AlarmHandler {
         Alarm persistedAlarm;
 
         // check if there is already a current alarm with the received primary key
-        Alarm existingAlarm = alarmServices.findCurrentByDomainAndPrimarySubject(alarmEvent.getDomain(),
-                alarmEvent.getPrimarySubject());
+        Alarm existingAlarm = alarmServices.find(alarmEvent);
 
         if (existingAlarm == null) {
             if (!AlarmSeverity.Clear.equals(eventSeverity)) {
@@ -120,7 +119,8 @@ public class AlarmHandler {
         // obtain the metamodel instance specified by the alarm instance
         AlarmMetaModel metaModel;
         try {
-            metaModel = alarmMetaModelManager.getMetaModelForDomain(alarmEvent.getDomain());
+            metaModel = alarmMetaModelManager.getMetaModelForNamespaceAndDomain(alarmEvent.getNamespace(),
+                    alarmEvent.getDomain());
         } catch (UnknownAlarmMetaModelException e) {
             LOGGER.error("Received alarm event mentions an unknown domain '{}'.", alarmEvent.getDomain());
             throw new InvalidAlarmException(InvalidAlarmException.Cause.UNKNOWN_DOMAIN);

@@ -2,25 +2,14 @@ package com.cpqd.vppd.alarmmanager.query;
 
 import com.cpqd.vppd.alarmmanager.core.converter.AlarmJsonConverter;
 import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmJsonException;
-import com.cpqd.vppd.alarmmanager.core.model.Alarm;
-import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
-import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryParameters;
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
+import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryFilters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +17,7 @@ import java.util.Map;
  * REST endpoints for alarm queries.
  */
 @Produces(MediaType.APPLICATION_JSON)
-@Path("/current")
+@Path("/alarms")
 public class AlarmQueryEndpoint {
 
     /**
@@ -43,7 +32,20 @@ public class AlarmQueryEndpoint {
     private AlarmJsonConverter alarmJsonConverter;
 
     @GET
+    @Path("current")
     public Response getCurrentAlarms(@QueryParam("severity") final List<String> severitiesAsString,
+                                     @QueryParam("from") final Long from,
+                                     @QueryParam("to") final Long to,
+                                     @QueryParam("text") final String text,
+                                     @QueryParam("lastId") final String lastId,
+                                     @QueryParam("maxResults") final Long maxResults) throws InvalidAlarmJsonException {
+        return this.getCurrentAlarms(null, severitiesAsString, from, to, text, lastId, maxResults);
+    }
+
+    @GET
+    @Path("current/{namespace}")
+    public Response getCurrentAlarms(@PathParam("namespace") String namespace,
+                                     @QueryParam("severity") final List<String> severitiesAsString,
                                      @QueryParam("from") final Long from,
                                      @QueryParam("to") final Long to,
                                      @QueryParam("text") final String text,
@@ -51,7 +53,7 @@ public class AlarmQueryEndpoint {
                                      @QueryParam("maxResults") final Long maxResults) throws InvalidAlarmJsonException {
         LOGGER.debug("[] +getCurrentAlarms");
 
-        CurrentAlarmsQueryParameters parameters = new CurrentAlarmsQueryParameters(severitiesAsString,
+        CurrentAlarmsQueryFilters parameters = new CurrentAlarmsQueryFilters(namespace, severitiesAsString,
                 from, to, text, lastId, maxResults);
 
         Map<String, Object> responseBody = alarmQueryHandler.getCurrentAlarmsAndMetadata(parameters);

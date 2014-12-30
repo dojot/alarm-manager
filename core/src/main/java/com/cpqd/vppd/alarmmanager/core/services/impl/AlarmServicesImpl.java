@@ -1,14 +1,14 @@
 package com.cpqd.vppd.alarmmanager.core.services.impl;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
+import com.cpqd.vppd.alarmmanager.core.model.BasicAlarmData;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
-import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryParameters;
+import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryFilters;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Implementation for alarm business services.
@@ -30,12 +30,12 @@ public class AlarmServicesImpl implements AlarmServices {
     }
 
     @Override
-    public List<Alarm> findCurrentAlarms(CurrentAlarmsQueryParameters parameters) {
-        return alarmRepository.findCurrentAlarms(parameters);
+    public List<Alarm> findCurrentAlarms(CurrentAlarmsQueryFilters parameters) {
+        return alarmRepository.findCurrentAlarmsByFilters(parameters);
     }
 
     @Override
-    public Alarm findCurrentByDomainAndPrimarySubject(String domain, Map<String, Object> primarySubject) {
-        return alarmRepository.findCurrentByDomainAndPrimarySubject(domain, primarySubject);
+    public Alarm find(BasicAlarmData alarm) {
+        return alarmRepository.find(alarm);
     }
 }

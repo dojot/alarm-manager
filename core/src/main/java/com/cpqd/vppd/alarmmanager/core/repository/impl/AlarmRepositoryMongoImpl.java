@@ -1,13 +1,13 @@
 package com.cpqd.vppd.alarmmanager.core.repository.impl;
 
-import com.cpqd.vppd.alarmmanager.core.model.metadata.CountBySeverity;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
+import com.cpqd.vppd.alarmmanager.core.model.BasicAlarmData;
+import com.cpqd.vppd.alarmmanager.core.model.metadata.CountByNamespaceAndSeverity;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
-import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryParameters;
+import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryFilters;
 import com.cpqd.vppd.alarmmanager.mongoconnector.annotation.JongoCollection;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.jongo.MongoCollection;
 import org.jongo.MongoCursor;
 import org.slf4j.Logger;
@@ -17,9 +17,8 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Repository bean for CRUD operations on alarms.
@@ -44,25 +43,21 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
     }
 
     @Override
-    public Map<AlarmSeverity, Long> getAlarmCountersBySeverity() {
-        List<CountBySeverity> aggregationResult = alarmsCollection.aggregate("{ $match: { disappearance: null } }")
-                .and("{ $group: { _id: '$severity', count: { $sum: 1 } } }")
-                .as(CountBySeverity.class);
-
-        Map<AlarmSeverity, Long> counters = new HashMap<>();
-
-        for (CountBySeverity countBySeverity : aggregationResult) {
-            counters.put(countBySeverity.getSeverity(), countBySeverity.getCount());
-        }
-
-        return counters;
+    public List<CountByNamespaceAndSeverity> getAlarmCountersByNamespaceAndSeverity() {
+        return alarmsCollection.aggregate("{ $match: { disappearance: null } }")
+                .and("{ $group: { _id: { namespace: '$namespace', severity: '$severity' } , count: { $sum: 1 } } }")
+                .as(CountByNamespaceAndSeverity.class);
     }
 
     @Override
-    public List<Alarm> findCurrentAlarms(CurrentAlarmsQueryParameters parameters) {
+    public List<Alarm> findCurrentAlarmsByFilters(CurrentAlarmsQueryFilters parameters) {
         List<Object> queryParams = new ArrayList<>();
 
         StringBuilder queryBuilder = new StringBuilder("{ disappearance: null");
+        // the namespace is always used
+        // if it is null, the query will return only alarms with no namespace
+        queryBuilder.append(", namespace: #");
+        queryParams.add(parameters.getNamespace());
         if (parameters.getLastId() != null) {
             queryBuilder.append(", _id: { $lt: # }");
             queryParams.add(parameters.getLastId());
@@ -120,8 +115,24 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
     }
 
     @Override
-    public Alarm findCurrentByDomainAndPrimarySubject(String domain, Map<String, Object> primarySubject) {
-        return alarmsCollection.findOne("{ domain: #, primarySubject: #, disappearance: null }",
-                domain, primarySubject).as(Alarm.class);
+    public List<Alarm> findCurrentWarningAlarmsOlderThan(Date timestamp) {
+        String query = "{ disappearance: null, severity: #, appearance: { $lte: # } }";
+
+        try (MongoCursor<Alarm> currentAlarmsCursor = alarmsCollection
+                .find(query, new Object[]{AlarmSeverity.Warning, timestamp})
+                .sort("{ _id: -1 }")
+                .as(Alarm.class)) {
+
+            return Lists.newArrayList(currentAlarmsCursor.iterator());
+        } catch (IOException e) {
+            LOGGER.error("Error executing 'find' operation in MongoDB", e);
+            return null;
+        }
+    }
+
+    @Override
+    public Alarm find(BasicAlarmData alarm) {
+        return alarmsCollection.findOne("{ namespace: #, domain: #, primarySubject: #, disappearance: null }",
+                alarm.getNamespace(), alarm.getDomain(), alarm.getPrimarySubject()).as(Alarm.class);
     }
 }

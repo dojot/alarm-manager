@@ -18,14 +18,16 @@ import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
+import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Class for alarm updates signaling through a WebSocket.
  */
 @Singleton
-@ServerEndpoint("/currentupdates")
+@ServerEndpoint("/currentupdates/{namespace}")
 public class AlarmWebSocketSignaling {
     /**
      * Logger.
@@ -51,14 +53,17 @@ public class AlarmWebSocketSignaling {
      * @param session the opened session.
      */
     @OnOpen
-    public void onOpen(Session session) {
+    public void onOpen(Session session,
+                       @PathParam("namespace") String namespace) {
         LOGGER.info("WebSocket session opened: {}", session.getId());
+        // store the association of this peer with the specified namespace
+        session.getUserProperties().put(namespace, true);
         connectedPeers.add(session);
     }
 
     /**
-     * Method called by the container
-     * @param alarmUpdateEvent
+     * Method called by the container when an alarm update event is raised.
+     * @param alarmUpdateEvent the raised event.
      */
     public void onAlarmUpdateEvent(@Observes @WBAlarmUpdateEvent AlarmUpdateEvent alarmUpdateEvent) {
         // FIXME if the priority of the observers is undefined, we may obtain
@@ -66,23 +71,31 @@ public class AlarmWebSocketSignaling {
         if (!connectedPeers.isEmpty()) {
             LOGGER.info("Alarm update event observed. Notifying connected peers");
 
-            Map<AlarmSeverity, Long> metadata = alarmMetadataServices.getCurrentAlarmsMetadata();
-            Map<String, Object> notification = new HashMap<>();
+            // the JSON event will be lazily generated
+            String updateJson = null;
 
-            notification.put("event", alarmUpdateEvent.getEvent());
-            notification.put("alarm", alarmUpdateEvent.getAlarm());
-            notification.put("metadata", metadata);
+            for (Session session : connectedPeers) {
+                if (Boolean.TRUE.equals(session.getUserProperties().get(alarmUpdateEvent.getAlarm().getNamespace()))) {
+                    if (updateJson == null) {
+                        Map<AlarmSeverity, AtomicLong> metadata =
+                                alarmMetadataServices.getCurrentAlarmsMetadata(alarmUpdateEvent.getAlarm().getNamespace());
+                        Map<String, Object> notification = new HashMap<>();
 
-            String updateJson;
-            try {
-                updateJson = alarmJsonConverter.toJson(notification);
-            } catch (InvalidAlarmJsonException e) {
-                LOGGER.error("Unable to convert alarm update event to JSON. Listeners will not be notified.");
-                return;
-            }
+                        notification.put("event", alarmUpdateEvent.getEvent());
+                        notification.put("alarm", alarmUpdateEvent.getAlarm());
+                        notification.put("metadata", metadata);
 
-            for (Session peer : connectedPeers) {
-                peer.getAsyncRemote().sendText(updateJson);
+                        try {
+                            updateJson = alarmJsonConverter.toJson(notification);
+                        } catch (InvalidAlarmJsonException e) {
+                            LOGGER.error("Unable to convert alarm update event to JSON. Listeners will not be notified.");
+                            return;
+                        }
+                    }
+
+                    // send the notification to the peer
+                    session.getAsyncRemote().sendText(updateJson);
+                }
             }
         }
     }

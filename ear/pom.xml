@@ -48,7 +48,7 @@
                         <webModule>
                             <groupId>com.cpqd.vppd.alarm-manager</groupId>
                             <artifactId>alarm-query</artifactId>
-                            <contextRoot>/alarms</contextRoot>
+                            <contextRoot>/alarmmanager</contextRoot>
                         </webModule>
                     </modules>
                     <fileNameMapping>no-version</fileNameMapping>

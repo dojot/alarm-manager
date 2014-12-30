@@ -18,6 +18,8 @@ public abstract class BasicAlarmData {
     @Id
     protected ObjectId id;
 
+    private String namespace;
+
     @NotNull
     protected String domain;
 
@@ -39,6 +41,7 @@ public abstract class BasicAlarmData {
     }
 
     public BasicAlarmData(BasicAlarmData other) {
+        this.namespace = other.namespace;
         this.domain = other.domain;
         this.description = other.description;
         this.severity = other.severity;
@@ -46,12 +49,20 @@ public abstract class BasicAlarmData {
         this.additionalData = ImmutableMap.copyOf(other.additionalData);
     }
 
-    public org.bson.types.ObjectId getId() {
+    public ObjectId getId() {
         return id;
     }
 
-    public void setId(org.bson.types.ObjectId id) {
+    public void setId(ObjectId id) {
         this.id = id;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 
     public String getDomain() {

@@ -12,9 +12,10 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Created by fabio on 26/12/14.
+ * Class which holds parameter values to be used to filter current alarm queries.
  */
-public class CurrentAlarmsQueryParameters {
+public class CurrentAlarmsQueryFilters {
+    private final String namespace;
     private final List<AlarmSeverity> severities;
     private final Date from;
     private final Date to;
@@ -22,12 +23,15 @@ public class CurrentAlarmsQueryParameters {
     private final ObjectId lastId;
     private final Long maxResults;
 
-    public CurrentAlarmsQueryParameters(List<String> severities,
-                                        Long from,
-                                        Long to,
-                                        String text,
-                                        String lastId,
-                                        Long maxResults) {
+    public CurrentAlarmsQueryFilters(String namespace,
+                                     List<String> severities,
+                                     Long from,
+                                     Long to,
+                                     String text,
+                                     String lastId,
+                                     Long maxResults) {
+        this.namespace = namespace;
+
         // convert list of severities
         if (severities != null && !severities.isEmpty()) {
             this.severities = Lists.transform(severities, new Function<String, AlarmSeverity>() {
@@ -51,14 +55,8 @@ public class CurrentAlarmsQueryParameters {
         this.maxResults = maxResults;
     }
 
-    public CurrentAlarmsQueryParameters(AlarmSeverity severity,
-                                        Date to) {
-        this.severities = Arrays.asList(severity);
-        this.from = null;
-        this.to = to;
-        this.text = null;
-        this.lastId = null;
-        this.maxResults = null;
+    public String getNamespace() {
+        return namespace;
     }
 
     public List<AlarmSeverity> getSeverities() {

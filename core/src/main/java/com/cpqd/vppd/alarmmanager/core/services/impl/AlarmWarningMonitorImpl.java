@@ -4,7 +4,7 @@ import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmDisappearanceReason;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
-import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryParameters;
+import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryFilters;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -41,8 +41,7 @@ public class AlarmWarningMonitorImpl {
         Date maxAppearanceDate = DateTime.now(DateTimeZone.UTC).minusMinutes(5).toDate();
 
         // find current warning alarms that appeared at least five minutes ago
-        List<Alarm> currentWarnings = alarmRepository.findCurrentAlarms(
-                new CurrentAlarmsQueryParameters(AlarmSeverity.Warning, maxAppearanceDate));
+        List<Alarm> currentWarnings = alarmRepository.findCurrentWarningAlarmsOlderThan(maxAppearanceDate);
 
         for (Alarm alarm : currentWarnings) {
             Date disappearance = new DateTime(alarm.getAppearance().getTime(), DateTimeZone.UTC).plusMinutes(5).toDate();

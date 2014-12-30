@@ -2,8 +2,11 @@ package com.cpqd.vppd.alarmmanager.core.repository;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
+import com.cpqd.vppd.alarmmanager.core.model.BasicAlarmData;
+import com.cpqd.vppd.alarmmanager.core.model.metadata.CountByNamespaceAndSeverity;
 
 import javax.ejb.Local;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -16,9 +19,11 @@ public interface AlarmRepository {
 
     public void update(Alarm alarm);
 
-    public Map<AlarmSeverity, Long> getAlarmCountersBySeverity();
+    public List<CountByNamespaceAndSeverity> getAlarmCountersByNamespaceAndSeverity();
 
-    public List<Alarm> findCurrentAlarms(CurrentAlarmsQueryParameters parameters);
+    public List<Alarm> findCurrentAlarmsByFilters(CurrentAlarmsQueryFilters parameters);
 
-    public Alarm findCurrentByDomainAndPrimarySubject(String domain, Map<String, Object> primarySubject);
+    public List<Alarm> findCurrentWarningAlarmsOlderThan(Date timestamp);
+
+    public Alarm find(BasicAlarmData alarm);
 }

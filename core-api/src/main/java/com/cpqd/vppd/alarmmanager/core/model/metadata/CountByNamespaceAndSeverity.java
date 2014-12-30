@@ -6,17 +6,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Created by fabio on 26/12/14.
  */
-public class CountBySeverity {
+public class CountByNamespaceAndSeverity {
     @JsonProperty("_id")
-    private AlarmSeverity severity;
+    private NamespaceAndSeverity key;
     private Long count;
 
-    public AlarmSeverity getSeverity() {
-        return severity;
+    public NamespaceAndSeverity getKey() {
+        return key;
     }
 
-    public void setSeverity(AlarmSeverity severity) {
-        this.severity = severity;
+    public void setKey(NamespaceAndSeverity key) {
+        this.key = key;
     }
 
     public Long getCount() {
