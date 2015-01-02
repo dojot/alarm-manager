@@ -1,14 +1,12 @@
 package com.cpqd.vppd.alarmmanager.core.repository;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
-import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 import com.cpqd.vppd.alarmmanager.core.model.BasicAlarmData;
 import com.cpqd.vppd.alarmmanager.core.model.metadata.CountByNamespaceAndSeverity;
 
 import javax.ejb.Local;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Interface for alarm repository implementations.
@@ -19,9 +17,9 @@ public interface AlarmRepository {
 
     public void update(Alarm alarm);
 
-    public List<CountByNamespaceAndSeverity> getAlarmCountersByNamespaceAndSeverity();
+    public List<CountByNamespaceAndSeverity> getCurrentAlarmCountersByNamespaceAndSeverity();
 
-    public List<Alarm> findCurrentAlarmsByFilters(CurrentAlarmsQueryFilters parameters);
+    public List<Alarm> findAlarmsByFilters(AlarmQueryFilters filters);
 
     public List<Alarm> findCurrentWarningAlarmsOlderThan(Date timestamp);
 

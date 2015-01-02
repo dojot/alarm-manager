@@ -1,5 +1,6 @@
 package com.cpqd.vppd.alarmmanager.core.repository;
 
+import com.cpqd.vppd.alarmmanager.core.model.AlarmQueryType;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -14,7 +15,8 @@ import java.util.List;
 /**
  * Class which holds parameter values to be used to filter current alarm queries.
  */
-public class CurrentAlarmsQueryFilters {
+public class AlarmQueryFilters {
+    private final AlarmQueryType type;
     private final String namespace;
     private final List<AlarmSeverity> severities;
     private final Date from;
@@ -23,13 +25,15 @@ public class CurrentAlarmsQueryFilters {
     private final ObjectId lastId;
     private final Long maxResults;
 
-    public CurrentAlarmsQueryFilters(String namespace,
-                                     List<String> severities,
-                                     Long from,
-                                     Long to,
-                                     String text,
-                                     String lastId,
-                                     Long maxResults) {
+    public AlarmQueryFilters(AlarmQueryType type,
+                             String namespace,
+                             List<String> severities,
+                             Long from,
+                             Long to,
+                             String text,
+                             String lastId,
+                             Long maxResults) {
+        this.type = type;
         this.namespace = namespace;
 
         // convert list of severities
@@ -53,6 +57,10 @@ public class CurrentAlarmsQueryFilters {
 
         this.text = text;
         this.maxResults = maxResults;
+    }
+
+    public AlarmQueryType getType() {
+        return type;
     }
 
     public String getNamespace() {

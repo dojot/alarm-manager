@@ -2,9 +2,7 @@ package com.cpqd.vppd.alarmmanager.core.services.impl;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmDisappearanceReason;
-import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
-import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryFilters;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;

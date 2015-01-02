@@ -11,7 +11,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
-import com.google.common.util.concurrent.AtomicLongMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +86,7 @@ public class AlarmMetadataServicesImpl implements AlarmMetadataServices {
     @PostConstruct
     @Schedule(hour = "*", persistent = false)
     public void synchronizeCountersWithDb() {
-        List<CountByNamespaceAndSeverity> counters = alarmRepository.getAlarmCountersByNamespaceAndSeverity();
+        List<CountByNamespaceAndSeverity> counters = alarmRepository.getCurrentAlarmCountersByNamespaceAndSeverity();
 
         // start the mapping anew
         currentCounters = HashBasedTable.create();

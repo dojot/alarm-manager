@@ -2,7 +2,7 @@ package com.cpqd.vppd.alarmmanager.core.services;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.BasicAlarmData;
-import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryFilters;
+import com.cpqd.vppd.alarmmanager.core.repository.AlarmQueryFilters;
 
 import javax.ejb.Local;
 import java.util.List;
@@ -16,7 +16,7 @@ public interface AlarmServices {
 
     void update(Alarm alarm);
 
-    List<Alarm> findCurrentAlarms(CurrentAlarmsQueryFilters parameters);
+    List<Alarm> findAlarmsByFilters(AlarmQueryFilters filters);
 
     Alarm find(BasicAlarmData alarm);
 }

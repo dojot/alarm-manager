@@ -3,7 +3,7 @@ package com.cpqd.vppd.alarmmanager.core.services.impl;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.BasicAlarmData;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
-import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryFilters;
+import com.cpqd.vppd.alarmmanager.core.repository.AlarmQueryFilters;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
 
 import javax.ejb.Stateless;
@@ -30,8 +30,8 @@ public class AlarmServicesImpl implements AlarmServices {
     }
 
     @Override
-    public List<Alarm> findCurrentAlarms(CurrentAlarmsQueryFilters parameters) {
-        return alarmRepository.findCurrentAlarmsByFilters(parameters);
+    public List<Alarm> findAlarmsByFilters(AlarmQueryFilters filters) {
+        return alarmRepository.findAlarmsByFilters(filters);
     }
 
     @Override

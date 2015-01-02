@@ -1,11 +1,12 @@
 package com.cpqd.vppd.alarmmanager.core.repository.impl;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
+import com.cpqd.vppd.alarmmanager.core.model.AlarmQueryType;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
 import com.cpqd.vppd.alarmmanager.core.model.BasicAlarmData;
 import com.cpqd.vppd.alarmmanager.core.model.metadata.CountByNamespaceAndSeverity;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
-import com.cpqd.vppd.alarmmanager.core.repository.CurrentAlarmsQueryFilters;
+import com.cpqd.vppd.alarmmanager.core.repository.AlarmQueryFilters;
 import com.cpqd.vppd.alarmmanager.mongoconnector.annotation.JongoCollection;
 import com.google.common.collect.Lists;
 import org.jongo.MongoCollection;
@@ -43,33 +44,42 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
     }
 
     @Override
-    public List<CountByNamespaceAndSeverity> getAlarmCountersByNamespaceAndSeverity() {
+    public List<CountByNamespaceAndSeverity> getCurrentAlarmCountersByNamespaceAndSeverity() {
+        // use MongoDB's aggregation pipeline to filter current alarms
+        // and group the results by namespace and severity
         return alarmsCollection.aggregate("{ $match: { disappearance: null } }")
                 .and("{ $group: { _id: { namespace: '$namespace', severity: '$severity' } , count: { $sum: 1 } } }")
                 .as(CountByNamespaceAndSeverity.class);
     }
 
     @Override
-    public List<Alarm> findCurrentAlarmsByFilters(CurrentAlarmsQueryFilters parameters) {
+    public List<Alarm> findAlarmsByFilters(AlarmQueryFilters filters) {
         List<Object> queryParams = new ArrayList<>();
 
-        StringBuilder queryBuilder = new StringBuilder("{ disappearance: null");
+        StringBuilder queryBuilder = new StringBuilder("{ disappearance:");
+        if (AlarmQueryType.History.equals(filters.getType())) {
+            queryBuilder.append(" { $ne:");
+        }
+        queryBuilder.append(" null");
+        if (AlarmQueryType.History.equals(filters.getType())) {
+            queryBuilder.append(" }");
+        }
         // the namespace is always used
         // if it is null, the query will return only alarms with no namespace
         queryBuilder.append(", namespace: #");
-        queryParams.add(parameters.getNamespace());
-        if (parameters.getLastId() != null) {
+        queryParams.add(filters.getNamespace());
+        if (filters.getLastId() != null) {
             queryBuilder.append(", _id: { $lt: # }");
-            queryParams.add(parameters.getLastId());
+            queryParams.add(filters.getLastId());
         }
-        if (parameters.getText() != null) {
+        if (filters.getText() != null) {
             queryBuilder.append(", $text: { $search: # }");
-            queryParams.add(parameters.getText());
+            queryParams.add(filters.getText());
         }
-        if (parameters.getSeverities() != null && !parameters.getSeverities().isEmpty()) {
+        if (filters.getSeverities() != null && !filters.getSeverities().isEmpty()) {
             queryBuilder.append(", severity: { $in: [");
             boolean firstSeverity = true;
-            for (AlarmSeverity severity : parameters.getSeverities()) {
+            for (AlarmSeverity severity : filters.getSeverities()) {
                 if (firstSeverity) {
                     firstSeverity = false;
                 } else {
@@ -80,18 +90,18 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
             }
             queryBuilder.append("] }");
         }
-        if (parameters.getFrom() != null || parameters.getTo() != null) {
+        if (filters.getFrom() != null || filters.getTo() != null) {
             queryBuilder.append(", appearance: { ");
-            if (parameters.getFrom() != null) {
+            if (filters.getFrom() != null) {
                 queryBuilder.append("$gte: #");
-                queryParams.add(parameters.getFrom());
-                if (parameters.getTo() != null) {
+                queryParams.add(filters.getFrom());
+                if (filters.getTo() != null) {
                     queryBuilder.append(", ");
                 }
             }
-            if (parameters.getTo() != null) {
+            if (filters.getTo() != null) {
                 queryBuilder.append("$lte: #");
-                queryParams.add(parameters.getTo());
+                queryParams.add(filters.getTo());
             }
             queryBuilder.append(" }");
         }
@@ -104,7 +114,7 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
         try (MongoCursor<Alarm> currentAlarmsCursor = alarmsCollection
                 .find(query, queryParams.toArray())
                 .sort("{ _id: -1 }")
-                .limit(parameters.getMaxResults() != null ? parameters.getMaxResults().intValue() : 0)
+                .limit(filters.getMaxResults() != null ? filters.getMaxResults().intValue() : 0)
                 .as(Alarm.class)) {
 
             return Lists.newArrayList(currentAlarmsCursor.iterator());
