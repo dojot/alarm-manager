@@ -55,7 +55,7 @@ public class AlarmWebSocketSignaling {
     @OnOpen
     public void onOpen(Session session,
                        @PathParam("namespace") String namespace) {
-        LOGGER.info("WebSocket session opened: {}", session.getId());
+        LOGGER.info("[{}] WebSocket session opened for namespace {}", session.getId(), namespace);
         // store the association of this peer with the specified namespace
         session.getUserProperties().put(namespace, true);
         connectedPeers.add(session);
@@ -109,7 +109,7 @@ public class AlarmWebSocketSignaling {
      */
     @OnClose
     public void onClose(Session session, CloseReason reason) {
-        LOGGER.info("WebSocket session closed: {}", session.getId());
+        LOGGER.info("[{}] WebSocket session closed", session.getId());
         connectedPeers.remove(session);
     }
 }

@@ -1,7 +1,10 @@
 package com.cpqd.vppd.alarmmanager.core.services.impl;
 
+import com.cpqd.vppd.alarmmanager.core.event.AlarmUpdateEvent;
+import com.cpqd.vppd.alarmmanager.core.event.WBAlarmUpdateEvent;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmDisappearanceReason;
+import com.cpqd.vppd.alarmmanager.core.model.AlarmOccurrence;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -11,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
@@ -30,6 +34,10 @@ public class AlarmWarningMonitorImpl {
     @Inject
     private AlarmRepository alarmRepository;
 
+    @Inject
+    @WBAlarmUpdateEvent
+    Event<AlarmUpdateEvent> alarmEventDispatcher;
+
     @Schedule(hour = "*", minute = "*/5", persistent = false)
     public void runWarningDisappearanceJob() {
         LOGGER.info("Running warning disappearance job");
@@ -48,6 +56,9 @@ public class AlarmWarningMonitorImpl {
             alarm.setLastModified(disappearance);
 
             alarmRepository.update(alarm);
+
+            // fire an event indicating there's been an alarm update so interested parties are notified
+            alarmEventDispatcher.fire(new AlarmUpdateEvent(AlarmOccurrence.Disappearance, null, alarm));
         }
 
         LOGGER.info("{} warning alarms were normalized", currentWarnings.size());
