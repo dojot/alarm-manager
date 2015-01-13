@@ -1,9 +1,6 @@
 package com.cpqd.vppd.alarmmanager.core.repository.impl;
 
-import com.cpqd.vppd.alarmmanager.core.model.Alarm;
-import com.cpqd.vppd.alarmmanager.core.model.AlarmQueryType;
-import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
-import com.cpqd.vppd.alarmmanager.core.model.BasicAlarmData;
+import com.cpqd.vppd.alarmmanager.core.model.*;
 import com.cpqd.vppd.alarmmanager.core.model.metadata.CountByNamespaceAndSeverity;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmQueryFilters;
@@ -56,6 +53,7 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
     public List<Alarm> findAlarmsByFilters(AlarmQueryFilters filters) {
         List<Object> queryParams = new ArrayList<>();
 
+        // history queries filter by non-null disappearance, and queries for current alarms by null disappearance
         StringBuilder queryBuilder = new StringBuilder("{ disappearance:");
         if (AlarmQueryType.History.equals(filters.getType())) {
             queryBuilder.append(" { $ne:");
@@ -69,13 +67,22 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
         queryBuilder.append(", namespace: #");
         queryParams.add(filters.getNamespace());
         if (filters.getLastId() != null) {
-            queryBuilder.append(", _id: { $lt: # }");
+            queryBuilder.append(", _id: { ");
+            if (AlarmSortOrder.Ascending.equals(filters.getSortOrder())) {
+                queryBuilder.append("$gt");
+            } else {
+                // null case is treated here, descending is the default
+                queryBuilder.append("$lt");
+            }
+            queryBuilder.append(": # }");
             queryParams.add(filters.getLastId());
         }
+        // text search, if it is present in filters
         if (filters.getText() != null) {
             queryBuilder.append(", $text: { $search: # }");
             queryParams.add(filters.getText());
         }
+        // filter by any of the severities, if at least one is present in filters
         if (filters.getSeverities() != null && !filters.getSeverities().isEmpty()) {
             queryBuilder.append(", severity: { $in: [");
             boolean firstSeverity = true;
@@ -90,6 +97,7 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
             }
             queryBuilder.append("] }");
         }
+        // filter by appearance timestamp range, if any of the bounds is present in filters
         if (filters.getFrom() != null || filters.getTo() != null) {
             queryBuilder.append(", appearance: { ");
             if (filters.getFrom() != null) {
@@ -111,9 +119,14 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
 
         LOGGER.debug("Query to run in MongoDB: '{}'", query);
 
+        // sorting parameters
+        // TODO validate 'orderBy' field names?
+        String orderByField = filters.getOrderBy() == null ? "_id" : filters.getOrderBy();
+        String sortOrder = AlarmSortOrder.Ascending.equals(filters.getSortOrder()) ? "1" : "-1";
+
         try (MongoCursor<Alarm> currentAlarmsCursor = alarmsCollection
                 .find(query, queryParams.toArray())
-                .sort("{ _id: -1 }")
+                .sort("{ " + orderByField + ": " + sortOrder + " }")
                 .limit(filters.getMaxResults() != null ? filters.getMaxResults().intValue() : 0)
                 .as(Alarm.class)) {
 

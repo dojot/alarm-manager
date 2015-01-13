@@ -4,6 +4,7 @@ import com.cpqd.vppd.alarmmanager.core.converter.AlarmJsonConverter;
 import com.cpqd.vppd.alarmmanager.core.exception.InvalidAlarmJsonException;
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmQueryType;
+import com.cpqd.vppd.alarmmanager.core.model.AlarmSortOrder;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmQueryFilters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +58,7 @@ public class AlarmQueryEndpoint {
         LOGGER.debug("[] +getCurrentAlarms");
 
         AlarmQueryFilters filters = new AlarmQueryFilters(AlarmQueryType.Current,
-                namespace, severitiesAsString, from, to, text, lastId, maxResults);
+                namespace, severitiesAsString, from, to, text, lastId, maxResults, null, null);
 
         Map<String, Object> responseBody = alarmQueryHandler.getCurrentAlarmsByFilterWithMetadata(filters);
 
@@ -72,8 +74,10 @@ public class AlarmQueryEndpoint {
                                      @QueryParam("to") final Long to,
                                      @QueryParam("text") final String text,
                                      @QueryParam("lastId") final String lastId,
-                                     @QueryParam("maxResults") final Long maxResults) throws InvalidAlarmJsonException {
-        return this.getAlarmsHistory(null, severitiesAsString, from, to, text, lastId, maxResults);
+                                     @QueryParam("maxResults") final Long maxResults,
+                                     @QueryParam("orderBy") final String orderBy,
+                                     @QueryParam("sortOrder") final AlarmSortOrder sortOrder) throws InvalidAlarmJsonException {
+        return this.getAlarmsHistory(null, severitiesAsString, from, to, text, lastId, maxResults, orderBy, sortOrder);
     }
 
     @GET
@@ -84,16 +88,20 @@ public class AlarmQueryEndpoint {
                                      @QueryParam("to") final Long to,
                                      @QueryParam("text") final String text,
                                      @QueryParam("lastId") final String lastId,
-                                     @QueryParam("maxResults") final Long maxResults) throws InvalidAlarmJsonException {
+                                     @QueryParam("maxResults") final Long maxResults,
+                                     @QueryParam("orderBy") final String orderBy,
+                                     @QueryParam("sortOrder") final AlarmSortOrder sortOrder) throws InvalidAlarmJsonException {
         LOGGER.debug("[] +getAlarmsHistory");
 
         AlarmQueryFilters filters = new AlarmQueryFilters(AlarmQueryType.History,
-                namespace, severitiesAsString, from, to, text, lastId, maxResults);
+                namespace, severitiesAsString, from, to, text, lastId, maxResults, orderBy, sortOrder);
 
         List<Alarm> alarms = alarmQueryHandler.getAlarmsByFilters(filters);
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("alarms", alarms);
 
         LOGGER.debug("[] -getAlarmsHistory");
 
-        return Response.ok().entity(alarmJsonConverter.toJson(alarms)).build();
+        return Response.ok().entity(alarmJsonConverter.toJson(responseBody)).build();
     }
 }

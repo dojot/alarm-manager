@@ -2,13 +2,13 @@ package com.cpqd.vppd.alarmmanager.core.repository;
 
 import com.cpqd.vppd.alarmmanager.core.model.AlarmQueryType;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSeverity;
+import com.cpqd.vppd.alarmmanager.core.model.AlarmSortOrder;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -24,6 +24,8 @@ public class AlarmQueryFilters {
     private final String text;
     private final ObjectId lastId;
     private final Long maxResults;
+    private final String orderBy;
+    private final AlarmSortOrder sortOrder;
 
     public AlarmQueryFilters(AlarmQueryType type,
                              String namespace,
@@ -32,7 +34,9 @@ public class AlarmQueryFilters {
                              Long to,
                              String text,
                              String lastId,
-                             Long maxResults) {
+                             Long maxResults,
+                             String orderBy,
+                             AlarmSortOrder sortOrder) {
         this.type = type;
         this.namespace = namespace;
 
@@ -57,6 +61,8 @@ public class AlarmQueryFilters {
 
         this.text = text;
         this.maxResults = maxResults;
+        this.orderBy = orderBy;
+        this.sortOrder = sortOrder;
     }
 
     public AlarmQueryType getType() {
@@ -89,5 +95,13 @@ public class AlarmQueryFilters {
 
     public Long getMaxResults() {
         return maxResults;
+    }
+
+    public String getOrderBy() {
+        return orderBy;
+    }
+
+    public AlarmSortOrder getSortOrder() {
+        return this.sortOrder;
     }
 }
