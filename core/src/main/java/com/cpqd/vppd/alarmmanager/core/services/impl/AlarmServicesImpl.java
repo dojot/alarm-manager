@@ -1,6 +1,7 @@
 package com.cpqd.vppd.alarmmanager.core.services.impl;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
+import com.cpqd.vppd.alarmmanager.core.model.Namespace;
 import com.cpqd.vppd.alarmmanager.core.model.BasicAlarmData;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmRepository;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmQueryFilters;
@@ -37,5 +38,10 @@ public class AlarmServicesImpl implements AlarmServices {
     @Override
     public Alarm find(BasicAlarmData alarm) {
         return alarmRepository.find(alarm);
+    }
+
+    @Override
+    public List<Namespace> findNamespaces() {
+        return alarmRepository.findNamespaces();
     }
 }

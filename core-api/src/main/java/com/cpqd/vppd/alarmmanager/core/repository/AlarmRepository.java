@@ -1,6 +1,7 @@
 package com.cpqd.vppd.alarmmanager.core.repository;
 
 import com.cpqd.vppd.alarmmanager.core.model.Alarm;
+import com.cpqd.vppd.alarmmanager.core.model.Namespace;
 import com.cpqd.vppd.alarmmanager.core.model.BasicAlarmData;
 import com.cpqd.vppd.alarmmanager.core.model.metadata.CountByNamespaceAndSeverity;
 
@@ -24,4 +25,6 @@ public interface AlarmRepository {
     public List<Alarm> findCurrentWarningAlarmsOlderThan(Date timestamp);
 
     public Alarm find(BasicAlarmData alarm);
+
+    public List<Namespace> findNamespaces();
 }

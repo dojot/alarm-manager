@@ -63,9 +63,12 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
             queryBuilder.append(" }");
         }
         // the namespace is always used
-        // if it is null, the query will return only alarms with no namespace
-        queryBuilder.append(", namespace: #");
-        queryParams.add(filters.getNamespace());
+        // if it is null, the query will return only alarms with no namespace.
+        // if it is 'all', the query will return all alarms
+        if (filters.getNamespace() != "all") {
+            queryBuilder.append(", namespace: #");
+            queryParams.add(filters.getNamespace());
+        }
         if (filters.getLastId() != null) {
             queryBuilder.append(", _id: { ");
             if (AlarmSortOrder.Ascending.equals(filters.getSortOrder())) {
@@ -157,5 +160,23 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
     public Alarm find(BasicAlarmData alarm) {
         return alarmsCollection.findOne("{ namespace: #, domain: #, primarySubject: #, disappearance: null }",
                 alarm.getNamespace(), alarm.getDomain(), alarm.getPrimarySubject()).as(Alarm.class);
+    }
+
+    @Override
+    public List<Namespace> findNamespaces() {
+        String query = "{}";
+        String fields =  "{namespace: 1}";
+
+        try (MongoCursor<Namespace> currentAlarmsCursor = alarmsCollection
+                .find(query)
+                .projection(fields)
+                .sort("{ _id: -1 }")
+                .as(Namespace.class)) {
+
+            return Lists.newArrayList(currentAlarmsCursor.iterator());
+        } catch (IOException e) {
+            LOGGER.error("Error executing 'find' operation in MongoDB", e);
+            return null;
+        }
     }
 }
