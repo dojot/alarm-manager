@@ -120,7 +120,7 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
 
         String query = queryBuilder.toString();
 
-        LOGGER.debug("Query to run in MongoDB: '{}'", query);
+        LOGGER.info("Query to run in MongoDB: '{}'", query);
 
         // sorting parameters
         // TODO validate 'orderBy' field names?

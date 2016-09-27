@@ -6,6 +6,7 @@ import com.cpqd.vppd.alarmmanager.core.model.Alarm;
 import com.cpqd.vppd.alarmmanager.core.model.Namespace;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmQueryType;
 import com.cpqd.vppd.alarmmanager.core.model.AlarmSortOrder;
+import com.cpqd.vppd.alarmmanager.core.repository.AlarmDeleteQueryFilters;
 import com.cpqd.vppd.alarmmanager.core.repository.AlarmQueryFilters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,6 +163,29 @@ public class AlarmQueryEndpoint {
         responseBody.put("alarms", alarms);
 
         LOGGER.debug("[] -getAllAlarmsHistory");
+
+        return Response.ok().entity(alarmJsonConverter.toJson(responseBody)).build();
+    }
+
+    @DELETE
+    @Path("current/{namespace}")
+    public Response deleteAlarmsCurrent(@PathParam("namespace") String namespace,
+                                        @QueryParam("instance_id") final String instance_id,
+                                        @QueryParam("module_name") final String module_name)
+            throws InvalidAlarmJsonException {
+
+        LOGGER.debug("[] +getAlarmsHistory");
+
+        AlarmQueryFilters filters = new AlarmQueryFilters(AlarmQueryType.Current,
+                namespace, null, null, null, null, null, null, null, null);
+
+        AlarmDeleteQueryFilters delete_filters = new AlarmDeleteQueryFilters(instance_id, module_name);
+
+        String response_text = alarmQueryHandler.deleteAlarmsByFilters(filters, delete_filters);
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("text", response_text);
+
+        LOGGER.debug("[] -deleteAlarmsCurrent");
 
         return Response.ok().entity(alarmJsonConverter.toJson(responseBody)).build();
     }
