@@ -22,4 +22,6 @@ public interface AlarmServices {
     Alarm find(BasicAlarmData alarm);
 
     List<Namespace> findNamespaces();
+
+    List<Alarm> findAllByPrimarySubject(BasicAlarmData alarm);
 }

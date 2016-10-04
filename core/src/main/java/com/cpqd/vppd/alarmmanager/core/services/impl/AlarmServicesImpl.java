@@ -44,4 +44,8 @@ public class AlarmServicesImpl implements AlarmServices {
     public List<Namespace> findNamespaces() {
         return alarmRepository.findNamespaces();
     }
+
+    public List<Alarm> findAllByPrimarySubject(BasicAlarmData alarm) {
+        return alarmRepository.findAllByPrimarySubject(alarm);
+    }
 }

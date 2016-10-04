@@ -27,4 +27,6 @@ public interface AlarmRepository {
     public Alarm find(BasicAlarmData alarm);
 
     public List<Namespace> findNamespaces();
+
+    public List<Alarm> findAllByPrimarySubject(BasicAlarmData alarm);
 }

@@ -18,6 +18,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 /**
  * Class that implements the logic of alarm handling.
@@ -44,12 +45,6 @@ public class AlarmHandler {
     Event<AlarmUpdateEvent> alarmEventDispatcher;
 
     public void handleAlarmEvent(AlarmEvent alarmEvent) {
-        try {
-            validateAlarm(alarmEvent);
-        } catch (InvalidAlarmException e) {
-            LOGGER.error("Received alarm event is invalid and will be discarded.");
-            return;
-        }
 
         // aux variables
         AlarmSeverity eventSeverity = alarmEvent.getSeverity();
@@ -57,9 +52,33 @@ public class AlarmHandler {
         AlarmOccurrence occurrence;
         Alarm persistedAlarm;
 
+        if (alarmEvent.getClear_all()) {
+            LOGGER.info("Let's Clear All!");
+
+            List<Alarm> existingAlarms = alarmServices.findAllByPrimarySubject(alarmEvent);
+
+            for (Alarm alarm : existingAlarms) {
+                // update the existing alarm with the data from the event and save it
+                alarmEvent.setSeverity(AlarmSeverity.Clear);
+                alarm.updateWithEvent(alarmEvent);
+                alarmServices.update(alarm);
+
+                // fire an event indicating there's been an alarm update so interested parties are notified
+                alarmEventDispatcher.fire(new AlarmUpdateEvent(AlarmOccurrence.Disappearance, null, alarm));
+            }
+            return;
+        }
+
+        try {
+            validateAlarm(alarmEvent);
+        } catch (InvalidAlarmException e) {
+            LOGGER.error("Received alarm event is invalid and will be discarded.");
+            return;
+        }
+
         // check if there is already a current alarm with the received primary key
         Alarm existingAlarm = alarmServices.find(alarmEvent);
-
+        
         if (existingAlarm == null) {
             if (!AlarmSeverity.Clear.equals(eventSeverity)) {
                 // the alarm does not exist in the system, add it

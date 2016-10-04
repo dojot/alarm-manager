@@ -13,6 +13,8 @@ public class AlarmEvent extends BasicAlarmData {
     @NotNull
     private Date eventTimestamp;
 
+    private Boolean clear_all;
+
     /**
      * Free text describing what caused the alarm to disappear. May be sent by the client.
      */
@@ -29,6 +31,8 @@ public class AlarmEvent extends BasicAlarmData {
     public String getDisappearanceReason() {
         return disappearanceReason;
     }
+
+    public Boolean getClear_all() { return clear_all; }
 
     public void setDisappearanceReason(String disappearanceReason) {
         this.disappearanceReason = disappearanceReason;

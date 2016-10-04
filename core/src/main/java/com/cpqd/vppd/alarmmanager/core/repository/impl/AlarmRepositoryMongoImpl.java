@@ -179,4 +179,19 @@ public class AlarmRepositoryMongoImpl implements AlarmRepository {
             return null;
         }
     }
+
+    public List<Alarm> findAllByPrimarySubject(BasicAlarmData alarm) {
+        String query = "{ disappearance: null, primarySubject: # }";
+
+        try (MongoCursor<Alarm> currentAlarmsCursor = alarmsCollection
+                .find(query, alarm.getPrimarySubject())
+                .sort("{ _id: -1 }")
+                .as(Alarm.class)) {
+
+            return Lists.newArrayList(currentAlarmsCursor.iterator());
+        } catch (IOException e) {
+            LOGGER.error("Error executing 'find' operation in MongoDB", e);
+            return null;
+        }
+    }
 }
