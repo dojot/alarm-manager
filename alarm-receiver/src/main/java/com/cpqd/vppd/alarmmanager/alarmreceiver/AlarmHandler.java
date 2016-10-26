@@ -71,6 +71,7 @@ public class AlarmHandler {
 
         try {
             validateAlarm(alarmEvent);
+            LOGGER.info("validateAlarm");
         } catch (InvalidAlarmException e) {
             LOGGER.error("Received alarm event is invalid and will be discarded.");
             return;
@@ -78,7 +79,7 @@ public class AlarmHandler {
 
         // check if there is already a current alarm with the received primary key
         Alarm existingAlarm = alarmServices.find(alarmEvent);
-        
+
         if (existingAlarm == null) {
             if (!AlarmSeverity.Clear.equals(eventSeverity)) {
                 // the alarm does not exist in the system, add it

@@ -13,7 +13,7 @@ public class AlarmEvent extends BasicAlarmData {
     @NotNull
     private Date eventTimestamp;
 
-    private Boolean clear_all;
+    private Boolean clear_all = false;
 
     /**
      * Free text describing what caused the alarm to disappear. May be sent by the client.
