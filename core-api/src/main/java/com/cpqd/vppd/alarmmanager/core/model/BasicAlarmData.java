@@ -46,7 +46,9 @@ public abstract class BasicAlarmData {
         this.description = other.description;
         this.severity = other.severity;
         this.primarySubject = ImmutableMap.copyOf(other.primarySubject);
-        this.additionalData = ImmutableMap.copyOf(other.additionalData);
+        if (other.additionalData != null) {
+            this.additionalData = ImmutableMap.copyOf(other.additionalData);
+        }
     }
 
     public ObjectId getId() {
