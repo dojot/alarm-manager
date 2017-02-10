@@ -7,6 +7,8 @@ import com.cpqd.vppd.alarmmanager.core.exception.UnknownAlarmMetaModelException;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModel;
 import com.cpqd.vppd.alarmmanager.core.metamodel.AlarmMetaModelManager;
 import com.cpqd.vppd.alarmmanager.core.model.*;
+import com.cpqd.vppd.alarmmanager.core.repository.AlarmDeleteQueryFilters;
+import com.cpqd.vppd.alarmmanager.core.repository.AlarmQueryFilters;
 import com.cpqd.vppd.alarmmanager.core.services.AlarmServices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +31,7 @@ public class AlarmHandler {
     /**
      * Logger.
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(AlarmEventProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlarmHandler.class);
 
     @Inject
     private AlarmMetaModelManager alarmMetaModelManager;
@@ -52,19 +54,32 @@ public class AlarmHandler {
         AlarmOccurrence occurrence;
         Alarm persistedAlarm;
 
-        if (alarmEvent.getClear_all()) {
+        if (alarmEvent.getClearAll()) {
             LOGGER.info("Let's Clear All!");
 
-            List<Alarm> existingAlarms = alarmServices.findAllByPrimarySubject(alarmEvent);
+            AlarmQueryFilters filters = new AlarmQueryFilters(AlarmQueryType.Current,
+                    "all", null, null, null, null, null, null, null, null);
+            List<Alarm> existingAlarms = alarmServices.findAlarmsByFilters(filters);
 
             for (Alarm alarm : existingAlarms) {
-                // update the existing alarm with the data from the event and save it
-                alarmEvent.setSeverity(AlarmSeverity.Clear);
-                alarm.updateWithEvent(alarmEvent);
-                alarmServices.update(alarm);
+                if ((
+                    alarmEvent.getPrimarySubject().get("instance_id") != null &&
+                    alarmEvent.getPrimarySubject().get("instance_id").equals(alarm.getPrimarySubject().get("instance_id"))
+                ) && (
+                    alarmEvent.getPrimarySubject().get("module_name") != null &&
+                    alarmEvent.getPrimarySubject().get("module_name").equals(alarm.getPrimarySubject().get("module_name"))
+                )) {
+                    // update the existing alarm with the data from the event and save it
+                    alarmEvent.setSeverity(AlarmSeverity.Clear);
+                    alarm.updateWithEvent(alarmEvent);
+                    alarmServices.update(alarm);
 
-                // fire an event indicating there's been an alarm update so interested parties are notified
-                alarmEventDispatcher.fire(new AlarmUpdateEvent(AlarmOccurrence.Disappearance, null, alarm));
+                    // fire an event indicating there's been an alarm update so interested parties are notified
+                    alarmEventDispatcher.fire(new AlarmUpdateEvent(AlarmOccurrence.Disappearance, null, alarm));
+
+                    LOGGER.info("Alarm cleared by module restart: module_name: {}, instance_id: {} ",
+                            alarm.getPrimarySubject().get("module_name"), alarm.getPrimarySubject().get("instance_id"));
+                }
             }
             return;
         }
