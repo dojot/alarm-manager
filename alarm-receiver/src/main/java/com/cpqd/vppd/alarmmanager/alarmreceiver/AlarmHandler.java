@@ -55,13 +55,16 @@ public class AlarmHandler {
         Alarm persistedAlarm;
 
         if (alarmEvent.getClearAll()) {
-            LOGGER.info("Let's Clear All!");
+            LOGGER.info("Let's clear all for module: {}, instance_id: {}!",
+                    alarmEvent.getPrimarySubject().get("instance_id"), alarmEvent.getPrimarySubject().get("module_name"));
 
             AlarmQueryFilters filters = new AlarmQueryFilters(AlarmQueryType.Current,
                     "all", null, null, null, null, null, null, null, null);
             List<Alarm> existingAlarms = alarmServices.findAlarmsByFilters(filters);
 
             for (Alarm alarm : existingAlarms) {
+                LOGGER.info("Alarm found: {}, instance_id: {} ",
+                        alarm.getPrimarySubject().get("module_name"), alarm.getPrimarySubject().get("instance_id"));
                 if ((
                     alarmEvent.getPrimarySubject().get("instance_id") != null &&
                     alarmEvent.getPrimarySubject().get("instance_id").equals(alarm.getPrimarySubject().get("instance_id"))
