@@ -1,0 +1,17 @@
+sudo: required
+
+language: java
+
+services:
+  - docker
+
+script:
+  - mvn install
+  - docker build -t alarm-manager .
+  - docker tag ejbca dojot/alarm-manager:latest
+
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+    docker push dojot/alarm-manager:latest;
+    fi
