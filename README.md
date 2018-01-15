@@ -1,6 +1,6 @@
 # Alarm Manager Server
 
-The Alarm Manager Server handle all the alarm notification from dojot modules, receiving then via RabbitMQ and exposes
+The Alarm Manager Server handles all the alarm notification from dojot modules, receiving then via RabbitMQ and exposes
 a REST API where the active alarms and their history can be queried by applications interested in this kind of
 information. It also provides a Websocket where applications can subscribe for notifications regarding alarm namespaces. 
 
